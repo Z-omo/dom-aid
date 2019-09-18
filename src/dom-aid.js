@@ -114,6 +114,49 @@ const DOM = {
     if (!element) { return; }
     return element.tagName.toLowerCase() === tagName.toLowerCase();
   },
+
+  find(selector, element = document)
+  {
+    let nodes = element.querySelectorAll(selector);
+    if (!nodes || 0 === nodes.length) { return; }
+
+   /*
+    * convert NodeList to an Array, otherwise IE throws error on a
+    * subsequent forEach:
+    */
+    return Array.prototype.slice.call(nodes);
+  },
+
+  add(element, parent = DOM.body)
+  {
+    parent.appendChild(element);
+  },
+
+  prepend(element, parent = DOM.body)
+  {
+    parent.insertBefore(element, parent.firstChild);
+  },
+
+  parent(element, selector)
+  {
+    if (!element) { return; }
+    let target = element;
+    let found;
+    let parent;
+
+    do
+    {
+      parent = target.parentNode;
+      if (!parent) { break; }
+
+      found = !selector || this.hasClass(selector, parent);
+      target = parent;
+    } while (!found && parent);
+
+    return parent;
+  },
+
+
 }
 
 export default DOM;

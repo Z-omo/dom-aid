@@ -179,3 +179,95 @@ test('can check if an element is a certain tag', t => {
   t.false(dom.is(element, 'p'));
   t.true(dom.is(element, 'DIV'));
 });
+
+test('can find all elements for a given query selector', t => {
+  const elements = [
+    document.createElement('div'),
+    document.createElement('div'),
+    document.createElement('div')
+  ];
+
+  elements.forEach(item => {
+    item.classList.add('test');
+    document.body.appendChild(item);
+  });
+
+  const result = dom.find('.test');
+  t.true(Array === (result).constructor);
+  t.is(result.length, 3);
+  t.is(result[0], elements[0]);
+});
+
+test('can add an element to the DOM body element', t => {
+  const element = document.createElement('div');
+  element.id = 'test';
+
+  dom.add(element);
+
+  const found = document.querySelector('div#test');
+  t.is(found, element);
+});
+
+test('can add an element to a defined parent element', t => {
+  const parent = document.createElement('div');
+  parent.id = 'testParent';
+  document.body.appendChild(parent);
+
+  const element = document.createElement('h1');
+  const content = 'Test Title';
+  element.innerHTML = content;
+  dom.add(element, parent);
+
+  const found = parent.querySelector('h1');
+  t.is(found, element);
+  t.is(found.innerHTML, content);
+});
+
+test('can prepend an element to a defined parent element', t => {
+  const parent = document.createElement('div');
+  parent.id = 'testParent';
+  document.body.appendChild(parent);
+
+  const element = document.createElement('h1');
+  const content = 'Test Title';
+  element.innerHTML = content;
+
+  dom.prepend(element, parent);
+
+  let found = parent.firstChild;
+  t.is(found, element);
+
+  const header = document.createElement('header');
+  dom.prepend(header, parent);
+
+  found = parent.firstChild;
+  t.is(found.nodeName, 'HEADER');
+});
+
+test('can find an element\'s parent node', t => {
+  const parent = document.createElement('div');
+  parent.id = 'testParent';
+  document.body.appendChild(parent);
+
+  const element = document.createElement('h1');
+  const content = 'Test Title';
+  element.innerHTML = content;
+  parent.appendChild(element);
+
+  const found = dom.parent(element);
+  t.is(found, parent);
+});
+
+test('can find an element\'s parent node of a given selector', t => {
+  const parent = document.createElement('div');
+  parent.classList.add('test_parent');
+  document.body.appendChild(parent);
+
+  const element = document.createElement('h1');
+  const content = 'Test Title';
+  element.innerHTML = content;
+  parent.appendChild(element);
+
+  const found = dom.parent(element, 'test_parent');
+  t.is(found, parent);
+});
