@@ -1,0 +1,32 @@
+{
+  "name": "dom-aid",
+  "version": "0.1.0",
+  "description": "Provides helper functions to perform simple HTML DOM actions supporting both modern and some legacy browsers.",
+  "scripts": {
+    "test": "ava"
+  },
+  "keywords": [],
+  "author": "Colin Tester",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.6.0",
+    "@babel/preset-env": "^7.6.0",
+    "@babel/register": "^7.6.0",
+    "ava": "^2.4.0",
+    "browser-env": "^3.2.6"
+  },
+  "ava": {
+    "files": [
+      "tests/*-test.js"
+    ],
+    "sources": [
+      "src/*.js"
+    ],
+    "failFast": true,
+    "verbose": true,
+    "require": [
+      "./tests/_babel-register.js",
+      "./tests/_browser-env.js"
+    ]
+  }
+}
