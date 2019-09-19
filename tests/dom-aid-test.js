@@ -150,7 +150,7 @@ test('can set a collection of styles rules on an element', t => {
   t.is(element.style.backgroundColor, styles.backgroundColor);
 });
 
-test('can set a colelction of attributes on an element', t => {
+test('can set a collection of attributes on an element', t => {
   const element = tag('div');
   const attrs = {
     id:           'foo',
