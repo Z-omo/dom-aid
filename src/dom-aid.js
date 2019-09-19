@@ -137,6 +137,19 @@ const DOM = {
     parent.insertBefore(element, parent.firstChild);
   },
 
+  matches(element, selector)
+  {
+    const match = (
+      element.matches ||
+      element.matchesSelector ||
+      element.msMatchesSelector ||
+      element.mozMatchesSelector ||
+      element.webkitMatchesSelector ||
+      element.oMatchesSelector).call(element, selector);
+
+    return match;
+  },
+
   parent(element, selector)
   {
     if (!element) { return; }
@@ -149,14 +162,38 @@ const DOM = {
       parent = target.parentNode;
       if (!parent) { break; }
 
-      found = !selector || this.hasClass(selector, parent);
+      found = !selector || this.matches(parent, selector);
       target = parent;
     } while (!found && parent);
 
     return parent;
   },
 
+  /*
+   * @params HTMLElement.
+   * @return DOMRect, or if element is undefined, object with values for the
+   * view-port (window).
+   */
+  dims(element)
+  {
+    let dims;
 
+    if (!element )
+    {
+      dims = {
+        top:    window.pageYOffset,
+        width:  window.innerWidth,
+        height: window.innerHeight,
+        bottom: window.pageYOffset + window.innerHeight
+      };
+
+    } else {
+
+      dims = element.getBoundingClientRect();
+    }
+
+    return dims;
+  }
 }
 
 export default DOM;

@@ -244,6 +244,18 @@ test('can prepend an element to a defined parent element', t => {
   t.is(found.nodeName, 'HEADER');
 });
 
+test('can check if an element matches a given selector', t => {
+  const element = document.createElement('div');
+  element.id = 'test';
+
+  let result = dom.matches(element, 'div#test');
+  t.true(result);
+
+  element.classList.add('foo');
+  result = dom.matches(element, 'div#test.foo');
+  t.true(result);
+});
+
 test('can find an element\'s parent node', t => {
   const parent = document.createElement('div');
   parent.id = 'testParent';
@@ -268,6 +280,35 @@ test('can find an element\'s parent node of a given selector', t => {
   element.innerHTML = content;
   parent.appendChild(element);
 
-  const found = dom.parent(element, 'test_parent');
+  const found = dom.parent(element, '.test_parent');
   t.is(found, parent);
+});
+
+test('can return the dimensions of the viewport', t => {
+  const dims = dom.dims();
+
+  t.is(typeof dims, 'object');
+  t.is(typeof dims.top, 'number');
+  t.is(dims.top, 0);
+
+  t.is(typeof dims.bottom, 'number');
+  t.true(dims.bottom > 0);
+
+  t.is(typeof dims.width, 'number');
+  t.true(dims.width > 0);
+
+  t.is(typeof dims.height, 'number');
+  t.true(dims.height > 0);
+});
+
+test('can return the dimensions of an element', t => {
+  const element = document.createElement('div');
+  document.body.appendChild(element);
+  element.style.cssText = 'width: 100px; height: 50px;';
+  
+  const dims = dom.dims(element);
+  t.is(typeof dims, 'object');
+
+  t.is(typeof dims.width, 'number');
+  t.is(typeof dims.height, 'number');
 });

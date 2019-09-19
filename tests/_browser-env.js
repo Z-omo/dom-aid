@@ -1,2 +1,2 @@
 const browserEnv = require('browser-env');
-browserEnv(['document']);
+browserEnv(['window', 'document']);
