@@ -5,8 +5,7 @@ const DOM = {
   body: document.querySelector('body'),
   modern: true, // for testing routines.
 
-  hasClass(className, element)
-  {
+  hasClass(className, element) {
     if (DOM.modern && element.classList)
     {
       return (element.classList && element.classList.contains(className));
@@ -20,8 +19,7 @@ const DOM = {
    * @param string classname to add, or multiple names separated by a space.
    * @params HTMLElement on which class is to be added.
    */
-  addClass(className, element)
-  {
+  addClass(className, element) {
     if (!element) { return; }
     if (DOM.modern && element.classList)
     {
@@ -39,13 +37,11 @@ const DOM = {
     }
   },
 
-  toggleClass(className, element)
-  {
+  toggleClass(className, element) {
     element.classList.toggle(className);
   },
 
-  removeClass(className, element)
-  {
+  removeClass(className, element) {
     if (!element) { return; }
 
     if (DOM.modern && element.classList)
@@ -62,8 +58,7 @@ const DOM = {
   /*
    * @params HTMLElement or array of elements.
    */
-  hide(elements)
-  {
+  hide(elements) {
     if (Array !== (elements).constructor) { elements = [elements]; }
     elements.forEach(e => e.style.display = 'none');
   },
@@ -71,8 +66,7 @@ const DOM = {
   /*
    * @params HTMLElement or array of elements.
    */
-  show(elements)
-  {
+  show(elements) {
     if (Array !== (elements).constructor) { elements = [elements]; }
     elements.forEach(e => e.style.display = '');
   },
@@ -80,8 +74,7 @@ const DOM = {
   /*
    * @params Object collection of style rule properties and their values.
    */
-  setStyle(rules, element)
-  {
+  setStyle(rules, element) {
     for (let prop in rules)
     {
       if (rules.hasOwnProperty(prop)) { element.style[prop] = rules[prop]; }
@@ -91,8 +84,7 @@ const DOM = {
   /*
    * @params Object collection of element attribute properties and their values.
    */
-  setAttrs(attrs, element)
-  {
+  setAttrs(attrs, element) {
     for (let prop in attrs)
     {
       if (attrs.hasOwnProperty(prop))
@@ -103,20 +95,17 @@ const DOM = {
   },
 
   // @return false or attribute value.
-  hasAttr(attrName, element)
-  {
+  hasAttr(attrName, element) {
     const value = element.getAttribute(attrName);
     return value || false;
   },
 
-  is(element, tagName)
-  {
+  is(element, tagName) {
     if (!element) { return; }
     return element.tagName.toLowerCase() === tagName.toLowerCase();
   },
 
-  find(selector, element = document)
-  {
+  find(selector, element = document) {
     let nodes = element.querySelectorAll(selector);
     if (!nodes || 0 === nodes.length) { return; }
 
@@ -127,18 +116,15 @@ const DOM = {
     return Array.prototype.slice.call(nodes);
   },
 
-  add(element, parent = DOM.body)
-  {
+  add(element, parent = DOM.body) {
     parent.appendChild(element);
   },
 
-  prepend(element, parent = DOM.body)
-  {
+  prepend(element, parent = DOM.body) {
     parent.insertBefore(element, parent.firstChild);
   },
 
-  matches(element, selector)
-  {
+  matches(element, selector) {
     const match = (
       element.matches ||
       element.matchesSelector ||
@@ -150,15 +136,13 @@ const DOM = {
     return match;
   },
 
-  parent(element, selector)
-  {
+  parent(element, selector) {
     if (!element) { return; }
     let target = element;
     let found;
     let parent;
 
-    do
-    {
+    do {
       parent = target.parentNode;
       if (!parent) { break; }
 
@@ -174,8 +158,7 @@ const DOM = {
    * @return DOMRect, or if element is undefined, object with values for the
    * view-port (window).
    */
-  dims(element)
-  {
+  dims(element) {
     let dims;
 
     if (!element )
