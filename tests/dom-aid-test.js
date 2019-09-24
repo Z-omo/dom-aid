@@ -1,7 +1,7 @@
 import test from 'ava';
 import dom from '../src/dom-aid.js';
 
-test('Imported DOM Aid is an object', t => {
+test('Imported DOMaid is an object', t => {
   t.is(typeof dom, 'object');
 });
 
@@ -311,4 +311,26 @@ test('can return the dimensions of an element', t => {
 
   t.is(typeof dims.width, 'number');
   t.is(typeof dims.height, 'number');
+});
+
+test('has customEvents property, initially set to null', t => {
+  t.is(dom.customEvents, null);
+});
+
+test('can trigger a custom event on the body element with data', t => {
+  const body = document.body;
+  const eventName = 'test.foo';
+  body.addEventListener(eventName, (e) => {
+    t.is(typeof e.detail, 'object');
+    t.is(typeof e.detail.foo, 'string');
+    t.is(e.detail.foo, 'bar');
+  }, { once: true });
+
+  dom.trigger(eventName, body, { foo: 'bar' });
+});
+
+test('now has custom event registered', t => {
+  t.is(typeof dom.customEvents, 'object');
+  t.is(typeof dom.customEvents['test.foo'], 'object');
+  t.true(dom.customEvents['test.foo'].target instanceof window.HTMLBodyElement);
 });

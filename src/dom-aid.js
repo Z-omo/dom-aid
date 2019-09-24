@@ -3,6 +3,7 @@
 const DOM = {
   html: document.querySelector('html'),
   body: document.querySelector('body'),
+  customEvents: null,
   modern: true, // for testing routines.
 
   hasClass(className, element) {
@@ -176,7 +177,67 @@ const DOM = {
     }
 
     return dims;
+  },
+
+  trigger(eventName, element, data)
+  {
+    let event = getCustomEvent(eventName, data);
+    if (!event)
+    {
+      throw new Error('Unable to trigger custom event: ' + eventName);
+    }
+
+    element.dispatchEvent(event);
   }
 }
 
 export default DOM;
+
+
+function getCustomEvent(eventName, data)
+{
+  if (DOM.customEvents && DOM.customEvents[eventName])
+  {
+    return DOM.customEvents[eventName];
+  }
+
+  let event = createCustomEvent(eventName, data);
+
+  registerCustomEvent(eventName, event);
+  return event;
+}
+
+function createCustomEvent(eventName, data)
+{
+  if ('function' !== typeof window.CustomEvent)
+  {
+    CustomEvent.prototype = window.Event.prototype;
+  }
+
+  let event = new CustomEvent(eventName, data && { detail: data });
+  return event;
+}
+
+/*
+ * Polyfill code gleaned from MDN:
+ * https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
+ */
+function CustomEvent(event, params)
+{
+  params = params || {
+    bubbles: false, cancelable: false, detail: undefined
+  };
+
+  let evt = document.createEvent('CustomEvent');
+  evt.initCustomEvent(
+    event, params.bubbles, params.cancelable, params.detail
+  );
+
+  return evt;
+}
+
+function registerCustomEvent(eventName, event)
+{
+  if (null === DOM.customEvents) { DOM.customEvents = {}; }
+  DOM.customEvents[eventName] = event;
+}

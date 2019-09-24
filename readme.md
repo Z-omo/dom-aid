@@ -98,5 +98,12 @@ dom.prepend(element);
 dom.prepend(element, parent);
 ```
 
+### Trigger a custom event on an element
 
+```javascript
+const element = document.createElement('div');
+dom.trigger('custom.event', element);
 
+// pass data when triggering a custom event:
+const data = { foo: 'bar' };
+dom.trigger('custom.event', element, data);
