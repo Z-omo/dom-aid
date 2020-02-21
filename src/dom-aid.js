@@ -126,15 +126,15 @@ const DOM = {
   },
 
   matches(element, selector) {
-    const match = (
+    const matches = (
       element.matches ||
       element.matchesSelector ||
       element.msMatchesSelector ||
       element.mozMatchesSelector ||
       element.webkitMatchesSelector ||
-      element.oMatchesSelector).call(element, selector);
+      element.oMatchesSelector);
 
-    return match;
+    return matches && matches.call(element, selector);
   },
 
   parent(element, selector) {
