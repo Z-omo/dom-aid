@@ -6,6 +6,10 @@ const DOM = {
   customEvents: null,
   modern: true, // for testing routines.
 
+  media(query) {
+    return window.matchMedia(query).matches;
+  },
+
   hasClass(className, element) {
     if (!element) { return; }
 
