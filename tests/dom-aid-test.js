@@ -320,13 +320,29 @@ test('has customEvents property, initially set to null', t => {
 test('can trigger a custom event on the body element with data', t => {
   const body = document.body;
   const eventName = 'test.foo';
-  body.addEventListener(eventName, (e) => {
-    t.is(typeof e.detail, 'object');
-    t.is(typeof e.detail.foo, 'string');
-    t.is(e.detail.foo, 'bar');
-  }, { once: true });
 
+  const handler = (e) => {
+    t.is(typeof e.detail, 'function');
+    t.is(typeof e.detail(eventName).foo, 'string');
+    t.is(e.detail(eventName).foo, 'bar');
+  };
+
+  body.addEventListener(eventName, handler, { once: true });
   dom.trigger(eventName, body, { foo: 'bar' });
+});
+
+test('can trigger the same custom event but with new data', t => {
+  const body = document.body;
+  const eventName = 'test.foo';
+
+  const handler = (e) => {
+    t.is(typeof e.detail, 'function');
+    t.is(typeof e.detail(e.type).bar, 'string');
+    t.is(e.detail(e.type).bar, 'foo');
+  };
+
+  body.addEventListener(eventName, handler, { once: true });
+  dom.trigger(eventName, body, { bar: 'foo' });
 });
 
 test('now has custom event registered', t => {

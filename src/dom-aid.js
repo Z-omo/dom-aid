@@ -7,6 +7,8 @@ const DOM = {
   modern: true, // for testing routines.
 
   hasClass(className, element) {
+    if (!element) { return; }
+
     if (DOM.modern && element.classList)
     {
       return (element.classList && element.classList.contains(className));
@@ -22,6 +24,7 @@ const DOM = {
    */
   addClass(className, element) {
     if (!element) { return; }
+
     if (DOM.modern && element.classList)
     {
       className.trim().split(' ')
@@ -39,16 +42,22 @@ const DOM = {
   },
 
   toggleClass(className, element) {
+    if (!element) { return; }
     element.classList.toggle(className);
   },
 
   removeClass(className, element) {
     if (!element) { return; }
 
-    if (DOM.modern && element.classList)
-    {
+    if (DOM.modern && element.classList) {
       element.classList.remove(className);
+
     } else {
+
+      if ('Array' === className.constructor.name) {
+        className = className.join(' ');
+      }
+
       element.className = element.className
         .replace( new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
     }
@@ -76,8 +85,9 @@ const DOM = {
    * @params Object collection of style rule properties and their values.
    */
   setStyle(rules, element) {
-    for (let prop in rules)
-    {
+    if (!element) { return; }
+
+    for (let prop in rules) {
       if (rules.hasOwnProperty(prop)) { element.style[prop] = rules[prop]; }
     }
   },
@@ -86,10 +96,10 @@ const DOM = {
    * @params Object collection of element attribute properties and their values.
    */
   setAttrs(attrs, element) {
-    for (let prop in attrs)
-    {
-      if (attrs.hasOwnProperty(prop))
-      {
+    if (!element) { return; }
+
+    for (let prop in attrs) {
+      if (attrs.hasOwnProperty(prop)) {
         element.setAttribute(prop, attrs[prop]);
       }
     }
@@ -97,6 +107,7 @@ const DOM = {
 
   // @return false or attribute value.
   hasAttr(attrName, element) {
+    if (!element) { return false; }
     const value = element.getAttribute(attrName);
     return value || false;
   },
@@ -118,10 +129,12 @@ const DOM = {
   },
 
   add(element, parent = DOM.body) {
+    if (!element) { return; }
     parent.appendChild(element);
   },
 
   prepend(element, parent = DOM.body) {
+    if (!element) { return; }
     parent.insertBefore(element, parent.firstChild);
   },
 
@@ -162,8 +175,7 @@ const DOM = {
   dims(element) {
     let dims;
 
-    if (!element )
-    {
+    if (!element ) {
       dims = {
         top:    window.pageYOffset,
         width:  window.innerWidth,
@@ -179,11 +191,9 @@ const DOM = {
     return dims;
   },
 
-  trigger(eventName, element, data)
-  {
+  trigger(eventName, element, data) {
     let event = getCustomEvent(eventName, data);
-    if (!event)
-    {
+    if (!event) {
       throw new Error('Unable to trigger custom event: ' + eventName);
     }
 
@@ -193,28 +203,57 @@ const DOM = {
 
 export default DOM;
 
+/*
+ * Support functions.
+ */
 
-function getCustomEvent(eventName, data)
-{
-  if (DOM.customEvents && DOM.customEvents[eventName])
-  {
+function getCustomEvent(eventName, data) {
+  // CustomEvents are cached so any data are stored locally to DOMaid,
+  // and can be recalled via the eventData function, which is set as
+  // the event handler event object detail, i.e. (evt) => evt.detail()
+  if (data) { customEventDataStore[eventName] = data; }
+
+  if (DOM.customEvents && DOM.customEvents[eventName]) {
     return DOM.customEvents[eventName];
   }
 
-  let event = createCustomEvent(eventName, data);
+  const event = createCustomEvent(eventName, data);
 
   registerCustomEvent(eventName, event);
   return event;
 }
 
-function createCustomEvent(eventName, data)
-{
-  if ('function' !== typeof window.CustomEvent)
-  {
-    CustomEvent.prototype = window.Event.prototype;
+// Holds, temporarily, custom event data.
+const customEventDataStore = {};
+
+// eventData function will return stored event data, if available.
+// Once called, stored eventName data is deleted.
+// Handlers for custom events can access data via event.detail(event.type);
+function eventData(eventName) {
+  const data = customEventDataStore[eventName];
+  if ('function' == typeof data) {
+    data = data();
   }
 
-  let event = new CustomEvent(eventName, data && { detail: data });
+  // make sure stored data is removed after all event handler calls.
+  setTimeout(() => clearEventData(eventName), 0);
+  return data;
+}
+
+// clearEventData makes sure event data is removed from the local store.
+function clearEventData(eventName) {
+  if (!customEventDataStore[eventName]) { return; }
+  delete customEventDataStore[eventName];
+}
+
+function createCustomEvent(eventName, data) {
+  if ('function' !== typeof window.CustomEvent) {
+    window.CustomEvent = PolyCustomEvent;
+  }
+
+  const event = new window.CustomEvent(
+    eventName, customEventDataStore[eventName] && { detail: eventData }
+  );
   return event;
 }
 
@@ -222,7 +261,7 @@ function createCustomEvent(eventName, data)
  * Polyfill code gleaned from MDN:
  * https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
  */
-function CustomEvent(event, params)
+function PolyCustomEvent(event, params)
 {
   params = params || {
     bubbles: false, cancelable: false, detail: undefined
@@ -236,8 +275,7 @@ function CustomEvent(event, params)
   return evt;
 }
 
-function registerCustomEvent(eventName, event)
-{
+function registerCustomEvent(eventName, event) {
   if (null === DOM.customEvents) { DOM.customEvents = {}; }
   DOM.customEvents[eventName] = event;
 }
