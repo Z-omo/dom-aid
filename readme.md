@@ -110,6 +110,6 @@ dom.trigger('custom.event', element, data);
 
 // to capture the data passed to a triggered event:
 element.addEventListener('custom.event', (e) => {
-  // e.detail is function.
+  // e.detail is a function.
   console.log(e.detail && e.detail().foo);
 });
