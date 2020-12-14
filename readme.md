@@ -58,8 +58,10 @@ dom.addClass('foo bar', element);
 // toggle HTMLElement's classname:
 dom.toggleClass('foo', element);
 
-// remove an HTMLElement's classname:
+// remove an HTMLElement's classname/s:
 dom.removeClass('foo', element);
+dom.removeClass('foo bar', element);
+dom.removeClass(['foo', 'bar'], element);
 
 // hide or show an element:
 dom.hide(element);
