@@ -188,6 +188,27 @@ test('can set a collection of styles rules on an element', t => {
   t.is(element.style.backgroundColor, styles.backgroundColor);
 });
 
+test('can remove a collection of styles rules from an element', t => {
+  const element = tag('div');
+  const styles = {
+    width:  '200px',
+    height: '100px',
+    backgroundColor: 'blue'
+  };
+
+  dom.setStyle(styles, element);
+
+  t.is(element.style.width, styles.width);
+  t.is(element.style.height, styles.height);
+  t.is(element.style.backgroundColor, styles.backgroundColor);
+
+  dom.removeStyle(styles, element);
+  
+  t.not(element.style.width, styles.width);
+  t.not(element.style.height, styles.height);
+  t.not(element.style.backgroundColor, styles.backgroundColor);
+});
+
 test('can set a collection of attributes on an element', t => {
   const element = tag('div');
   const attrs = {

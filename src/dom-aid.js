@@ -101,6 +101,26 @@ const DOM = {
   },
 
   /*
+   * @params Object collection of style rule properties and their values.
+   */
+  removeStyle(rules, element) {
+    if (!element) { return; }
+
+    /*
+     * CSSStyleDeclaration.removeProperty() expects property name
+     * to be hyphenated and not camelCase, e.g. background-color
+     */
+    const regexCamelCase = /([a-zA-Z])(?=[A-Z])/g;
+
+    for (let prop in rules) {
+      if (rules.hasOwnProperty(prop)) { 
+        prop = prop.replace(regexCamelCase, '$1-').toLowerCase();
+        element.style.removeProperty(prop);
+      }
+    }
+  },
+
+  /*
    * @params Object collection of element attribute properties and their values.
    */
   setAttrs(attrs, element) {
