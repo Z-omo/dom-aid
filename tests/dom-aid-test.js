@@ -80,6 +80,30 @@ test('can remove a class from a modern browser element', t => {
   t.false(element.classList.contains('foo'));
 });
 
+test('can remove multiple class names from a modern browser element', t => {
+  const element = tag('div');
+
+  dom.modern = true;
+  dom.addClass('foo bar', element);
+  t.true(element.classList.contains('foo'));
+
+  dom.removeClass(['foo', 'bar'], element);
+  t.false(element.classList.contains('foo'));
+  t.false(element.classList.contains('bar'));
+});
+
+test('can remove multiple class names from a legacy browser element', t => {
+  const element = tag('div');
+
+  dom.modern = false;
+  dom.addClass('foo bar', element);
+  t.true(element.classList.contains('foo'));
+
+  dom.removeClass('foo bar', element);
+  t.false(element.classList.contains('foo'));
+  t.false(element.classList.contains('bar'));
+});
+
 test('can remove a class from a legacy browser element', t => {
   const element = tag('div');
 
