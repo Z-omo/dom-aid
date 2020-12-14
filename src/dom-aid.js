@@ -54,8 +54,11 @@ const DOM = {
     if (!element) { return; }
 
     if (DOM.modern && element.classList) {
-      className.trim().split(' ')
-        .forEach((name) => element.classList.remove(name));
+      if ('String' === className.constructor.name) {
+        className = className.trim().split(' ');
+      }
+      
+      className.forEach((name) => element.classList.remove(name));
 
     } else {
 
