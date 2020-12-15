@@ -75,6 +75,13 @@ dom.show([element1, element2]);
 const rules = { width: '100px', height: '50px', backgroundColor: 'blue' };
 dom.setStyle(rules, element);
 
+// remove same rules object on an HTMLElement:
+dom.removeStyle(rules, element);
+
+// remove CSS rules passed as a string or an array:
+dom.removeStyle('width height', element);
+dom.removeStyle(['width', 'height'], element);
+
 // set attributes on an HTMLElement:
 const attrs = {
   id:           'foo',
