@@ -120,8 +120,8 @@ const DOM = {
     rules.forEach(prop => {
       prop = prop.replace(regexCamelCase, '$1-').toLowerCase();
       if (hasSR) {
-        //delete element.style[prop];
-        element.style[prop] = '';
+        delete element.style[prop];
+        //element.style[prop] = '';
       } else {
         element.style.removeProperty(prop);
       }
