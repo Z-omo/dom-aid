@@ -33,7 +33,6 @@ test('can check if legacy browser element has a classname', t => {
   dom.modern = false;
 
   t.true(dom.hasClass('test', element));
-  
 });
 
 test('can add a classname to a modern browser element', t => {
@@ -188,8 +187,54 @@ test('can set a collection of styles rules on an element', t => {
   t.is(element.style.backgroundColor, styles.backgroundColor);
 });
 
-test('can remove a collection of styles rules from an element', t => {
+test('can remove a collection object of styles rules from an element', t => {
   const element = tag('div');
+  const styles = {
+    width:  '200px',
+    height: '100px',
+    backgroundColor: 'blue'
+  };
+
+  dom.setStyle(styles, element);
+
+  t.is(element.style.width, styles.width);
+  t.is(element.style.height, styles.height);
+  t.is(element.style.backgroundColor, styles.backgroundColor);
+
+  dom.removeStyle(styles, element);
+  
+  t.not(element.style.width, styles.width);
+  t.not(element.style.height, styles.height);
+  t.not(element.style.backgroundColor, styles.backgroundColor);
+});
+
+test('can remove a collection array of styles rules from an element', t => {
+  const element = tag('div');
+  const styles = {
+    width:  '200px',
+    height: '100px',
+    backgroundColor: 'blue'
+  };
+
+  dom.setStyle(styles, element);
+
+  t.is(element.style.width, styles.width);
+  t.is(element.style.height, styles.height);
+  t.is(element.style.backgroundColor, styles.backgroundColor);
+
+  const toRemove = ['width', 'backgroundColor'];
+  dom.removeStyle(toRemove, element);
+  
+  t.not(element.style.width, styles.width);
+  t.is(element.style.height, styles.height);
+  t.not(element.style.backgroundColor, styles.backgroundColor);
+});
+
+
+test('can remove styles from a custom element shadowRoot', t => {
+  const element = tag('div');
+  element.mockSR = true;
+
   const styles = {
     width:  '200px',
     height: '100px',

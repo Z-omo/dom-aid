@@ -105,6 +105,11 @@ const DOM = {
    */
   removeStyle(rules, element) {
     if (!element) { return; }
+    const hasSR = !!element.shadowRoot || element.mockSR;
+    
+    if ('Object' === rules.constructor.name) {
+      rules = Object.keys(rules);
+    }
 
     /*
      * CSSStyleDeclaration.removeProperty() expects property name
@@ -112,12 +117,15 @@ const DOM = {
      */
     const regexCamelCase = /([a-zA-Z])(?=[A-Z])/g;
 
-    for (let prop in rules) {
-      if (rules.hasOwnProperty(prop)) { 
-        prop = prop.replace(regexCamelCase, '$1-').toLowerCase();
+    rules.forEach(prop => {
+      prop = prop.replace(regexCamelCase, '$1-').toLowerCase();
+      if (hasSR) {
+        //delete element.style[prop];
+        element.style[prop] = '';
+      } else {
         element.style.removeProperty(prop);
       }
-    }
+    });
   },
 
   /*
