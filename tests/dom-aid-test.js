@@ -187,6 +187,35 @@ test('can set a collection of styles rules on an element', t => {
   t.is(element.style.backgroundColor, styles.backgroundColor);
 });
 
+test('can remove single style rule as a string from an element', t => {
+  const element = tag('div');
+  const styles = {
+    backgroundColor: 'blue'
+  };
+
+  dom.setStyle(styles, element);
+  t.is(element.style.backgroundColor, styles.backgroundColor);
+
+  dom.removeStyle('backgroundColor', element);
+  t.not(element.style.backgroundColor, styles.backgroundColor);
+});
+
+test('can remove multiple style rules as a string from an element', t => {
+  const element = tag('div');
+  const styles = {
+    width: '100px',
+    backgroundColor: 'blue'
+  };
+
+  dom.setStyle(styles, element);
+  t.is(element.style.width, styles.width);
+  t.is(element.style.backgroundColor, styles.backgroundColor);
+
+  dom.removeStyle('backgroundColor width', element);
+  t.not(element.style.width, styles.width);
+  t.not(element.style.backgroundColor, styles.backgroundColor);
+});
+
 test('can remove a collection object of styles rules from an element', t => {
   const element = tag('div');
   const styles = {
@@ -230,7 +259,6 @@ test('can remove a collection array of styles rules from an element', t => {
   t.not(element.style.backgroundColor, styles.backgroundColor);
 });
 
-
 test('can remove styles from a custom element shadowRoot', t => {
   const element = tag('div');
   element.mockSR = true;
@@ -242,13 +270,11 @@ test('can remove styles from a custom element shadowRoot', t => {
   };
 
   dom.setStyle(styles, element);
-
   t.is(element.style.width, styles.width);
   t.is(element.style.height, styles.height);
   t.is(element.style.backgroundColor, styles.backgroundColor);
 
   dom.removeStyle(styles, element);
-  
   t.not(element.style.width, styles.width);
   t.not(element.style.height, styles.height);
   t.not(element.style.backgroundColor, styles.backgroundColor);

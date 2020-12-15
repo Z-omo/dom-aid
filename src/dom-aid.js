@@ -107,9 +107,12 @@ const DOM = {
     if (!element) { return; }
     const hasSR = !!element.shadowRoot || element.mockSR;
     
-    if ('Object' === rules.constructor.name) {
+    const rcn = rules.constructor.name;
+    if ('Object' === rcn) {
       rules = Object.keys(rules);
-    }
+    } else if ('String' === rcn) {
+      rules = rules.trim().split(' ');
+    } 
 
     /*
      * CSSStyleDeclaration.removeProperty() expects property name
@@ -120,8 +123,8 @@ const DOM = {
     rules.forEach(prop => {
       prop = prop.replace(regexCamelCase, '$1-').toLowerCase();
       if (hasSR) {
-        delete element.style[prop];
-        //element.style[prop] = '';
+        //delete element.style[prop];
+        element.style[prop] = '';
       } else {
         element.style.removeProperty(prop);
       }
