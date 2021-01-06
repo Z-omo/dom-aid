@@ -23,10 +23,10 @@ const found = dom.find('.foo');
 // returns an array of found HTMLElements from within specified parent HTMLElement:
 const found = dom.find('.foo', parent);
 
-// returns parent element of the supplied HTMLElement:
+// returns direct parent element of the supplied HTMLElement:
 const parent = dom.parent(element);
 
-// returns element's parent node which matches specified selector:
+// returns element's parent (ancestor) node which matches specified selector:
 const parent = dom.parent(element, '#parent-id');
 ```
 
