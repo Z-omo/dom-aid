@@ -250,13 +250,15 @@ function getCustomEvent(eventName, data) {
   // CustomEvents are cached so any data are stored locally to DOMaid,
   // and can be recalled via the eventData function, which is set as
   // the event handler event object detail, i.e. (evt) => evt.detail()
-  if (data) { customEventDataStore[eventName] = data; }
-
+  data && (customEventDataStore[eventName] = data);
+  
   if (DOM.customEvents && DOM.customEvents[eventName]) {
+    // already registered custom event.
     return DOM.customEvents[eventName];
   }
 
-  const event = createCustomEvent(eventName, data);
+  // …otherwise create the custom event:
+  const event = createCustomEvent(eventName);
 
   registerCustomEvent(eventName, event);
   return event;
@@ -266,16 +268,15 @@ function getCustomEvent(eventName, data) {
 const customEventDataStore = {};
 
 // eventData function will return stored event data, if available.
+// Note: event data can be anything including a function.
 // Once called, stored eventName data is deleted.
 // Handlers for custom events can access data via event.detail(event.type);
 function eventData(eventName) {
-  const data = customEventDataStore[eventName];
-  if ('function' == typeof data) {
-    data = data();
-  }
-
-  // make sure stored data is removed after all event handler calls.
-  setTimeout(() => clearEventData(eventName), 0);
+  let data = customEventDataStore[eventName];
+  if ('function' == typeof data) { data = data(); }
+  
+  // make sure any stored data is removed after all event handler calls.
+  data && setTimeout(() => clearEventData(eventName), 0);
   return data;
 }
 
@@ -285,13 +286,15 @@ function clearEventData(eventName) {
   delete customEventDataStore[eventName];
 }
 
-function createCustomEvent(eventName, data) {
+function createCustomEvent(eventName) {
   if ('function' !== typeof window.CustomEvent) {
     window.CustomEvent = PolyCustomEvent;
   }
 
   const event = new window.CustomEvent(
-    eventName, customEventDataStore[eventName] && { detail: eventData }
+    // detail (eventData function) is always included to allow
+    // data to be added to already registered custom events.
+    eventName, { detail: eventData }
   );
   return event;
 }

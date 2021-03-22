@@ -451,7 +451,7 @@ test('can trigger a custom event on the body element with data', t => {
   const body = document.body;
   const eventName = 'test.foo';
 
-  const handler = (e) => {
+  const handler = e => {
     t.is(typeof e.detail, 'function');
     t.is(typeof e.detail(eventName).foo, 'string');
     t.is(e.detail(eventName).foo, 'bar');
@@ -465,7 +465,7 @@ test('can trigger the same custom event but with new data', t => {
   const body = document.body;
   const eventName = 'test.foo';
 
-  const handler = (e) => {
+  const handler = e => {
     t.is(typeof e.detail, 'function');
     t.is(typeof e.detail(e.type).bar, 'string');
     t.is(e.detail(e.type).bar, 'foo');
@@ -479,4 +479,62 @@ test('now has custom event registered', t => {
   t.is(typeof dom.customEvents, 'object');
   t.is(typeof dom.customEvents['test.foo'], 'object');
   t.true(dom.customEvents['test.foo'].target instanceof window.HTMLBodyElement);
+});
+
+test('can trigger a custom event without data', t => {
+  const body = document.body;
+  const eventName = 'test.value';
+
+  const handler = e => {
+    // without event data we expect event.detail still be a function:
+    t.is(typeof e.detail, 'function');
+
+    // …but return no data:
+    t.is(e.detail(e.type), undefined);
+    
+    // check that our custom event is registered:
+    t.is(typeof dom.customEvents, 'object');
+    t.is(typeof dom.customEvents['test.value'], 'object');
+    t.true(dom.customEvents['test.value'].target instanceof window.HTMLBodyElement);
+  };
+
+  body.addEventListener(eventName, handler, { once: true });
+  dom.trigger(eventName, body);
+});
+
+test('can now add data to a previous custom event', t => {
+  const body = document.body;
+  const eventName = 'test.value';
+  const eventData = { value: 'foo' };
+
+  const handler = e => {
+    // this time we expect detail to return an object:
+    t.is(typeof e.detail, 'function');
+    const data = e.detail(e.type);
+    t.is(typeof data, 'object');
+    
+    // check returned object is equal to our test eventData:
+    t.deepEqual(data, eventData);
+    t.is(typeof data.value, 'string');
+    t.is(data.value, eventData.value);
+  };
+
+  body.addEventListener(eventName, handler, { once: true });
+  dom.trigger(eventName, body, eventData);
+});
+
+test('can trigger custom event that includes a function as its data', t => {
+  const body = document.body;
+  const eventName = 'test.function';
+  const testFunc = () => 'function value';
+
+  const handler = e => {
+    // this time we expect detail to return the value from our test function:
+    const data = e.detail(e.type);
+    t.is(typeof data, 'string');
+    t.is(data, 'function value');
+  };
+
+  body.addEventListener(eventName, handler, { once: true });
+  dom.trigger(eventName, body, testFunc);
 });
