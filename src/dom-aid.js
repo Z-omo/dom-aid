@@ -7,7 +7,7 @@ const DOM = {
   modern: true, // for testing routines.
 
   media(query) {
-    return window.matchMedia(query).matches;
+    return window.matchMedia && window.matchMedia(query).matches;
   },
 
   hasClass(className, element) {
@@ -54,7 +54,7 @@ const DOM = {
     if (!element) { return; }
 
     if (DOM.modern && element.classList) {
-      if ('String' === className.constructor.name) {
+      if ('string' === typeof className) {
         className = className.trim().split(' ');
       }
       
