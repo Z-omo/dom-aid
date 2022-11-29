@@ -1,5 +1,18 @@
+/*
+ * AVA test file dom-aid.js module.
+ */
+
+// Set up global objects for browser emulation:
+import { JSDOM } from 'jsdom';
+const jsDOM = new JSDOM();
+
+jsDOM.reconfigure({windowTop: 100 });
+const { window } = jsDOM;
+const { document } = window;
+
 import test from 'ava';
 import dom from '../src/dom-aid.js';
+dom.setEnvironment(window); // set window object for tests.
 
 test('Imported DOMaid is an object', t => {
   t.is(typeof dom, 'object');
