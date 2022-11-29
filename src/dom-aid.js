@@ -1,13 +1,27 @@
 'use strict';
 
 const DOM = {
-  html: document.querySelector('html'),
-  body: document.querySelector('body'),
   customEvents: null,
-  modern: true, // for testing routines.
+  modern: true, // for switching testing routines.
+  win: null, // represents window object.
+  doc: null, // represents window.document object.
+  
+  /**
+   * Set operating environment and related properties, via a window object.
+   * In normal operation this would be the browser window object; in testing
+   * this will be an instance of the JSDOM module window object.
+   * 
+   * @param {Object} w – representing global window object
+   */
+  setEnvironment(w = window) {
+    this.win = w;
+    this.doc = w.document;
+    this.html = this.doc.querySelector('html');
+    this.body = this.doc.querySelector('body');
+  },
 
   media(query) {
-    return window.matchMedia && window.matchMedia(query).matches;
+    return this.win.matchMedia && this.win.matchMedia(query).matches;
   },
 
   hasClass(className, element) {
@@ -22,9 +36,10 @@ const DOM = {
     }
   },
 
-  /*
-   * @param string classname to add, or multiple names separated by a space.
-   * @params HTMLElement on which class is to be added.
+  /**
+   * @param {string} classname – selector to add, or multiple selectors
+   * separated by a space.
+   * @params {HTMLElement} element – on which class is to be added.
    */
   addClass(className, element) {
     if (!element) { return; }
@@ -73,24 +88,25 @@ const DOM = {
     if ('' === element.className) { element.removeAttribute('class'); }
   },
 
-  /*
-   * @params HTMLElement or array of elements.
+  /**
+   * @params {HTMLElement|Array} elements - to be hidden.
    */
   hide(elements) {
     if (Array !== (elements).constructor) { elements = [elements]; }
     elements.forEach(e => e.style.display = 'none');
   },
 
-  /*
-   * @params HTMLElement or array of elements.
+  /**
+   * @params {HTMLElement|Array} elements - to be made visible.
    */
   show(elements) {
     if (Array !== (elements).constructor) { elements = [elements]; }
     elements.forEach(e => e.style.display = '');
   },
 
-  /*
-   * @params Object collection of style rule properties and their values.
+  /**
+   * @params {Object} rules - style rule properties and their values.
+   * @params {HTMLElement} element - on which style rules are to be applied.
    */
   setStyle(rules, element) {
     if (!element) { return; }
@@ -100,8 +116,9 @@ const DOM = {
     }
   },
 
-  /*
-   * @params Object collection of style rule properties and their values.
+  /**
+   * @params {Object} rules - style rule properties and their values.
+   * @params {HTMLElement} element - on which style rules are to be removed.
    */
   removeStyle(rules, element) {
     if (!element) { return; }
@@ -131,8 +148,9 @@ const DOM = {
     });
   },
 
-  /*
-   * @params Object collection of element attribute properties and their values.
+  /**
+   * @params {Object} attrs - attribute property names and their values.
+   * @params {HTMLElement} element - on which attributes are to be applied.
    */
   setAttrs(attrs, element) {
     if (!element) { return; }
@@ -144,7 +162,14 @@ const DOM = {
     }
   },
 
-  // @return false or attribute value.
+  /**
+   * Check if an element has an attribute value.
+   * 
+   * @param {String} attrName - to be read on hte targeted element.
+   * @param {HTMLElement} element - on which to read the required attribute.
+   * @returns {String|Boolean} – found attribute value or false if named
+   * attribute does not exist on the target element.
+   */
   hasAttr(attrName, element) {
     if (!element) { return false; }
     const value = element.getAttribute(attrName);
@@ -156,7 +181,7 @@ const DOM = {
     return element.tagName.toLowerCase() === tagName.toLowerCase();
   },
 
-  find(selector, element = document) {
+  find(selector, element = DOM.doc) {
     let nodes = element.querySelectorAll(selector);
     if (!nodes || 0 === nodes.length) { return; }
 
@@ -206,28 +231,23 @@ const DOM = {
     return parent;
   },
 
-  /*
-   * @params HTMLElement.
-   * @return DOMRect, or if element is undefined, object with values for the
-   * view-port (window).
+  /**
+   * Get the dimensions of the defined element or, when no element is passed,
+   * the window object (browser viewport).
+   * 
+   * @params {HTMLElement} element (optional) – target DOM element.
+   * @return {DOMRect|Object} – of target element, or if element is undefined, 
+   * values for the view-port (window).
    */
   dims(element) {
-    let dims;
+    if (element) { return element.getBoundingClientRect(); }
 
-    if (!element ) {
-      dims = {
-        top:    window.pageYOffset,
-        width:  window.innerWidth,
-        height: window.innerHeight,
-        bottom: window.pageYOffset + window.innerHeight
-      };
-
-    } else {
-
-      dims = element.getBoundingClientRect();
-    }
-
-    return dims;
+    return {
+      top:    DOM.win.pageYOffset,
+      width:  DOM.win.innerWidth,
+      height: DOM.win.innerHeight,
+      bottom: DOM.win.pageYOffset + DOM.win.innerHeight
+    };
   },
 
   trigger(eventName, element, data) {
@@ -239,6 +259,8 @@ const DOM = {
     element.dispatchEvent(event);
   }
 }
+
+if ('undefined' !== typeof window) { DOM.setEnvironment(window); }
 
 export default DOM;
 
@@ -287,11 +309,11 @@ function clearEventData(eventName) {
 }
 
 function createCustomEvent(eventName) {
-  if ('function' !== typeof window.CustomEvent) {
+  if ('function' !== typeof DOM.win.CustomEvent) {
     window.CustomEvent = PolyCustomEvent;
   }
 
-  const event = new window.CustomEvent(
+  const event = new DOM.win.CustomEvent(
     // detail (eventData function) is always included to allow
     // data to be added to already registered custom events.
     eventName, { detail: eventData }
@@ -309,7 +331,7 @@ function PolyCustomEvent(event, params)
     bubbles: false, cancelable: false, detail: undefined
   };
 
-  let evt = document.createEvent('CustomEvent');
+  let evt = DOM.doc.createEvent('CustomEvent');
   evt.initCustomEvent(
     event, params.bubbles, params.cancelable, params.detail
   );
