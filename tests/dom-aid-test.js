@@ -427,6 +427,20 @@ test('can find an element\'s parent node of a given selector', t => {
   t.is(found, parent);
 });
 
+test('can return null when an element\'s parent node does not exist for a given selector', t => {
+  const parent = document.createElement('div');
+  parent.classList.add('test_parent');
+  document.body.appendChild(parent);
+
+  const element = document.createElement('h1');
+  const content = 'Test Title';
+  element.innerHTML = content;
+  parent.appendChild(element);
+
+  const found = dom.parent(element, '.not_test_parent');
+  t.is(found, null);
+});
+
 test('can return the dimensions of the viewport', t => {
   const dims = dom.dims();
 
