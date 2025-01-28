@@ -14,6 +14,11 @@ import test from 'ava';
 import dom from '../src/dom-aid.js';
 dom.setEnvironment(window); // set window object for tests.
 
+// Helper function to create a new HTML Element.
+function tag(type) {
+  return document.createElement(type);
+}
+
 test('Imported DOMaid is an object', t => {
   t.is(typeof dom, 'object');
 });
@@ -46,18 +51,66 @@ test('can check that passed values is NOT an HTML element', t => {
 });
 
 test('can check passed value is an HTML element', t => {
-  let el = document.createElement('div');
+  let el = tag('div');
   let result = dom.isElement(el);
   t.true(result);
 
-  el = document.createElement('p');
+  el = tag('p');
   result = dom.isElement(el);
   t.true(result);
 });
 
-function tag(type) {
-  return document.createElement(type);
-}
+test('can convert a string of HTML into an Element', t => {
+  const s = '<p id="testContent">test content</p>';
+  const result = dom.stringToNodes(s);
+
+  t.true(Array === (result).constructor);
+  t.is(result.length, 1);
+
+  const el = result[0];
+  t.is(el.nodeName, 'P', 'Expected element of wrong type');
+  t.is(el.textContent, 'test content', 'Unexpected text content');
+});
+
+test('can convert a string of HTML into multiple Elements', t => {
+  const s = '<p id="p1">test content</p><p id="p2">test 2 content</p>';
+  const result = dom.stringToNodes(s);
+
+  t.true(Array === (result).constructor);
+  t.is(result.length, 2);
+
+  let el = result[0];
+  t.is(el.nodeName, 'P', 'Expected element of wrong type');
+  t.is(el.textContent, 'test content', 'Unexpected text content');
+  el = result[1];
+  t.is(el.nodeName, 'P', 'Expected element of wrong type');
+  t.is(el.textContent, 'test 2 content', 'Unexpected text content');
+});
+
+test('can convert a string of nested HTML into multiple Elements', t => {
+  const s = '<p id="p1">test <span>content</span></p><p id="p2">test 2 <a>content</a></p>';
+  const result = dom.stringToNodes(s);
+
+  t.true(Array === (result).constructor);
+  t.is(result.length, 2);
+
+  // first parent element:
+  let el = result[0];
+  t.is(el.nodeName, 'P', 'Expected element of wrong type');
+  t.is(el.textContent, 'test content', 'Unexpected text content');
+
+  // … and its child element:
+  el = el.querySelector('span');
+  t.is(el.nodeName, 'SPAN', 'Expected element of wrong type');
+
+  // second parent element:
+  el = result[1];
+  t.is(el.nodeName, 'P', 'Expected element of wrong type');
+
+  // … and its child element:
+  el = el.querySelector('a');
+  t.is(el.nodeName, 'A', 'Expected element of wrong type');
+});
 
 test('can check if modern browser element has a classname', t => {
   const element = tag('div');
@@ -351,10 +404,12 @@ test('can check if an element is a certain tag', t => {
 });
 
 test('can find all elements for a given query selector', t => {
+  dom.empty();
+
   const elements = [
-    document.createElement('div'),
-    document.createElement('div'),
-    document.createElement('div')
+    tag('div'),
+    tag('div'),
+    tag('div')
   ];
 
   elements.forEach(item => {
@@ -369,7 +424,9 @@ test('can find all elements for a given query selector', t => {
 });
 
 test('can add an element to the DOM body element', t => {
-  const element = document.createElement('div');
+  dom.empty();
+
+  const element = tag('div');
   element.id = 'test';
 
   dom.add(element);
@@ -379,6 +436,8 @@ test('can add an element to the DOM body element', t => {
 });
 
 test('can add an an HTML string as an element to the DOM body element', t => {
+  dom.empty();
+
   const html = '<div id="test2"></div>';
   dom.add(html);
 
@@ -390,11 +449,13 @@ test('can add an an HTML string as an element to the DOM body element', t => {
 });
 
 test('can add an element to a defined parent element', t => {
-  const parent = document.createElement('div');
+  dom.empty();
+
+  const parent = tag('div');
   parent.id = 'testParent';
   document.body.appendChild(parent);
 
-  const element = document.createElement('h1');
+  const element = tag('h1');
   const content = 'Test Title';
   element.innerHTML = content;
   dom.add(element, parent);
@@ -404,12 +465,118 @@ test('can add an element to a defined parent element', t => {
   t.is(found.innerHTML, content);
 });
 
+test('can add multiple elements to the DOM body element', t => {
+  dom.empty();
+
+  const el1 = tag('div');
+  el1.id = 'test1';
+  const el2 = tag('div');
+  el2.id = 'test2';
+  const el3 = tag('div');
+  el3.id = 'test3';
+
+  dom.add([el1, el2, el3]); // add array of Elements to DOM.
+
+  // find first element:
+  let found = document.querySelector('div#test1');
+  t.is(typeof found, 'object');
+  t.is(found.nodeName, 'DIV');
+  t.true('test1' === found.id);
+
+  // find second element:
+  found = document.querySelector('div#test2');
+  t.is(typeof found, 'object');
+  t.is(found.nodeName, 'DIV');
+  t.true('test2' === found.id);
+
+  // find third element:
+  found = document.querySelector('div#test3');
+  t.is(typeof found, 'object');
+  t.is(found.nodeName, 'DIV');
+  t.true('test3' === found.id);
+});
+
+test('can add multiple HTML strings to the DOM body element', t => {
+  dom.empty();
+
+  const html = [
+    '<div id="test3"></div>',
+    '<div id="test4"></div>',
+    '<div id="test5"></div>'
+  ];
+  dom.add(html); // add array of HTML strings to DOM.
+
+  // find first element:
+  let found = document.querySelector('div#test3');
+  t.is(typeof found, 'object');
+  t.is(found.nodeName, 'DIV');
+  t.is('test3', found.id);
+
+  // find second element:
+  found = document.querySelector('div#test4');
+  t.is(typeof found, 'object');
+  t.is(found.nodeName, 'DIV');
+  t.is('test4', found.id);
+
+  // find third element:
+  found = document.querySelector('div#test5');
+  t.is(typeof found, 'object');
+  t.is(found.nodeName, 'DIV');
+  t.true('test5' === found.id);
+});
+
+test('can add a mix of HTML strings and Elements into body element', t => {
+  dom.empty();
+
+  const el1 = tag('h1');
+  el1.id = 'test1';
+  el1.textContent = 'heading';
+  const el4 = tag('p');
+  el4.id = 'test4';
+  el4.textContent = 'paragraph 2';
+
+  const mix = [
+    el1,
+    '<div id="test2"><a>anchor</a></div><p>paragraph 1</p>',
+    el4
+  ];
+
+  dom.add(mix);
+
+  const nodes = dom.body.childNodes;
+  t.is(nodes.length, 4);
+
+  // check all 4 expected Elements, in order:
+  let node = nodes.item(0);
+  t.is(node.nodeName, 'H1');
+  t.is(node.textContent, el1.textContent);
+
+  node = nodes.item(1);
+  t.is(node.nodeName, 'DIV');
+  t.is(node.id, 'test2');
+
+  // check expected child element of previous node:
+  node = node.firstChild;
+  t.is(node.nodeName, 'A');
+  t.is(node.textContent, 'anchor');
+
+  node = nodes.item(2);
+  t.is(node.nodeName, 'P');
+  t.is(node.textContent, 'paragraph 1');
+
+  node = nodes.item(3);
+  t.is(node.nodeName, 'P');
+  t.is(node.textContent, el4.textContent);
+});
+
 test('can prepend an element to a defined parent element', t => {
-  const parent = document.createElement('div');
+  dom.empty();
+
+  const parent = tag('div');
   parent.id = 'testParent';
   document.body.appendChild(parent);
 
-  const element = document.createElement('h1');
+  const element = tag('h1');
   const content = 'Test Title';
   element.innerHTML = content;
 
@@ -418,7 +585,7 @@ test('can prepend an element to a defined parent element', t => {
   let found = parent.firstChild;
   t.is(found, element);
 
-  const header = document.createElement('header');
+  const header = tag('header');
   dom.prepend(header, parent);
 
   found = parent.firstChild;
@@ -426,6 +593,8 @@ test('can prepend an element to a defined parent element', t => {
 });
 
 test('can prepend HTML string to BODY Element', t => {
+  dom.empty();
+
   const id = 'prependTest';
   const test = `<div id="${id}"></div>`;
   dom.prepend(test);
@@ -436,21 +605,23 @@ test('can prepend HTML string to BODY Element', t => {
 });
 
 test('can prepend HTML string to defined parent Element', t => {
-  const parent = document.createElement('div');
+  dom.empty();
+
+  const parent = tag('div');
   parent.id = 'testParent';
   document.body.appendChild(parent);
 
   const id = 'prependTest2';
-  const test = `<div id="${id}"></div>`;
+  const test = `<p id="${id}"></p>`;
   dom.prepend(test, parent);
 
   const found = parent.firstChild;
-  t.is(found.nodeName, 'DIV', 'Added node is expected type');
+  t.is(found.nodeName, 'P', 'Added node is expected type');
   t.true(id === found.id, 'Added element has expected ID');
 });
 
 test('can check if an element matches a given selector', t => {
-  const element = document.createElement('div');
+  const element = tag('div');
   element.id = 'test';
 
   let result = dom.matches(element, 'div#test');
@@ -462,13 +633,13 @@ test('can check if an element matches a given selector', t => {
 });
 
 test('can find an element\'s parent node', t => {
-  const parent = document.createElement('div');
+  const parent = tag('div');
   parent.id = 'testParent';
   document.body.appendChild(parent);
 
-  const element = document.createElement('h1');
+  const element = tag('h1');
   const content = 'Test Title';
-  element.innerHTML = content;
+  element.textContent = content;
   parent.appendChild(element);
 
   const found = dom.parent(element);
@@ -476,13 +647,13 @@ test('can find an element\'s parent node', t => {
 });
 
 test('can find an element\'s parent node of a given selector', t => {
-  const parent = document.createElement('div');
+  const parent = tag('div');
   parent.classList.add('test_parent');
   document.body.appendChild(parent);
 
-  const element = document.createElement('h1');
+  const element = tag('h1');
   const content = 'Test Title';
-  element.innerHTML = content;
+  element.textContent = content;
   parent.appendChild(element);
 
   const found = dom.parent(element, '.test_parent');
@@ -490,13 +661,13 @@ test('can find an element\'s parent node of a given selector', t => {
 });
 
 test('can return null when an element\'s parent node does not exist for a given selector', t => {
-  const parent = document.createElement('div');
+  const parent = tag('div');
   parent.classList.add('test_parent');
   document.body.appendChild(parent);
 
-  const element = document.createElement('h1');
+  const element = tag('h1');
   const content = 'Test Title';
-  element.innerHTML = content;
+  element.textContent = content;
   parent.appendChild(element);
 
   const found = dom.parent(element, '.not_test_parent');
@@ -521,7 +692,7 @@ test('can return the dimensions of the viewport', t => {
 });
 
 test('can return the dimensions of an element', t => {
-  const element = document.createElement('div');
+  const element = tag('div');
   document.body.appendChild(element);
   element.style.cssText = 'width: 100px; height: 50px;';
 

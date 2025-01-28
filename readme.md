@@ -105,10 +105,20 @@ dom.add(element);
 // add HTML Element to specified parent HTML Element:
 dom.add(element, parent);
 
-// add prepare HTML string to page body or parent Element:
+// add multiple HTML Elements, via and Array, to page body or parent Element:
+const element1 = document.createElement('div');
+const element2 = document.createElement('p');
+dom.add([element1, element2]);
+dom.add([element1, element2], parent);
+
+// add prepared HTML string to page body or parent Element:
 const html = '<p class="new-content">New content…</p>';
 dom.add(html);
 dom.add(html, parent);
+
+// add a mix of Elements and prepared HTML strings:
+dom.add([element1, html, element2]);
+dom.add([element1, html, element2], parent);
 
 // prepend HTML Element to page body, or specified parent:
 dom.prepend(element);

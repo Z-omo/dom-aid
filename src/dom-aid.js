@@ -5,6 +5,7 @@ const DOM = {
   modern: true, // for switching testing routines.
   win: null,    // represents window object.
   doc: null,    // represents window.document object.
+  tmpDoc: null, // represents a temporary HTML document for parsing strings.
 
   /**
    * Set operating environment and related properties, via a window object.
@@ -25,7 +26,25 @@ const DOM = {
   },
 
   /**
-   * Check if document matches suopplied media query.
+   * Convert a string of HTML to actual HTML Elements.
+   * @param {String} s – representing prepared HTML content.
+   * @returns {Array.Element}
+   */
+  stringToNodes(s) {
+    // if not yet instantiated, create temporary HTML document:
+    if (!this.tmpDoc) {
+      this.tmpDoc = this.doc.implementation.createHTMLDocument();
+    }
+
+    // set temporary document with passed HTML:
+    this.tmpDoc.body.innerHTML = s;
+
+    // return an array of parsed HTML elements:
+    return Array.prototype.slice.call(this.tmpDoc.body.childNodes);
+  },
+
+  /**
+   * Check if document matches supplied media query.
    * @param {string} query - representing @media query string.
    * @returns {Boolean}
    */
@@ -221,23 +240,47 @@ const DOM = {
   },
 
   /**
-   * Append supplied element or HTML string to document body element
-   * or defined parent element.
-   * @param {Element|String} element node or HTML string – to be appended.
-   * @param {Element} [parent=<body>] - defined parent HTML element.
+   * Clear an Element of its children.
+   * @param {Element} [element=<body>] – to be emptied of all child elements.
    */
-  add(element, parent = DOM.body) {
-    if (String === (element).constructor) {
-      parent.insertAdjacentHTML('beforeend', element);
-    } else if (this.isElement(element)) {
-      parent.appendChild(element);
-    }
+  empty(element = DOM.body) {
+    element.textContent = '';
+  },
+
+  /**
+   * Append supplied element(s) or HTML string(s) to document body element
+   * or defined parent element.
+   * @param {(Element|String|Array.Element|String)} elements – to be
+   * appended to DOM.
+   * @param {Element} [parent=<body>] - target parent Element.
+   */
+  add(elements, parent = DOM.body) {
+    if (Array !== (elements).constructor) { elements = [elements]; }
+
+    // prepare elements collection:
+    const append = [];
+    elements.forEach(v => {
+      if (String === (v).constructor) {
+        append.push(...this.stringToNodes(v));
+      } else if (this.isElement(v)) {
+        append.push(v);
+      }
+    });
+
+    // depending on number of elements to add, create the target element:
+    const t = (1 < append.length) ? this.doc.createDocumentFragment() : parent;
+
+    // set each passed element into target element:
+    append.forEach(el => t.appendChild(el));
+
+    // if target is a temporary fragment, insert into intended parent:
+    t.nodeType === DOM.body.DOCUMENT_FRAGMENT_NODE && parent.appendChild(t);
   },
 
   /**
    * Prepend supplied element to document body element or
    * defined parent element.
-   * @param {Element|String} element or HTML string – to be prepended.
+   * @param {(Element|String)} element or HTML string – to be prepended.
    * @param {Element} [parent=<body>] - defined parent HTML element.
    */
   prepend(element, parent = DOM.body) {
