@@ -28,12 +28,6 @@ test('includes a reference to the document <body> element', t => {
   t.is(dom.body.nodeName, 'BODY');
 });
 
-// test('can check that document matches a media query', t => {
-//   const result = dom.media('(min-width: 640px)');
-//   console.log('result: ', result);
-//   t.true(result);
-// });
-
 test('can check that passed values is NOT an HTML element', t => {
   let result = dom.isElement();
   t.false(result, 'Undefined is not an Element node');
