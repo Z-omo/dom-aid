@@ -17,13 +17,13 @@ DOMaid provides a collection of methods to find, examine, modify and insert HTML
 ### Find elements
 
 ```javascript
-// returns an array of found HTMLElements which match the specified selector:
+// returns an array of found HTML Elements which match the specified selector:
 const found = dom.find('.foo');
 
-// returns an array of found HTMLElements from within specified parent HTMLElement:
+// returns an array of found HTML Elements from within specified parent HTML Element:
 const found = dom.find('.foo', parent);
 
-// returns direct parent element of the supplied HTMLElement:
+// returns direct parent element of the supplied HTML Element:
 const parent = dom.parent(element);
 
 // returns element's parent (ancestor) node which matches specified selector:
@@ -33,32 +33,35 @@ const parent = dom.parent(element, '#parent-id');
 ### Examine elements
 
 ```javascript
-// whether an HTMLElement has the class name specified (returns a boolean):
+// whether an HTML Element has the class name specified (returns a boolean):
 const result = dom.hasClass('foo', element);
 
-// whether an HTMLElement has an attribute set, returns attribute value or false:
+// whether an HTML Element has an attribute set, returns attribute value or false:
 const result = dom.hasAttr('data-foo', element);
 
-// check whether HTMLElement matches the specified selector:
+// check whether HTML Element matches the specified selector:
 const result = dom.matches(element, 'div#foo');
 
 // get the browser view-port dimensions:
 const dims = dom.dims();
 
-// get dimensions of the supplied HTMLElement:
+// get dimensions of the supplied HTML Element:
 const dims = dom.dims(element);
+
+// check if HTML document matches a specific media query:
+const result = dom.media('(min-width: 640px)');
 ```
 
 ### Modify elements
 
 ```javascript
-// Adds classname/s to an HTMLElement:
+// Adds classname/s to an HTML Element:
 dom.addClass('foo bar', element);
 
-// toggle HTMLElement's classname:
+// toggle HTML Element's classname:
 dom.toggleClass('foo', element);
 
-// remove an HTMLElement's classname/s:
+// remove an HTML Element's classname/s:
 dom.removeClass('foo', element);
 dom.removeClass('foo bar', element);
 dom.removeClass(['foo', 'bar'], element);
@@ -67,22 +70,22 @@ dom.removeClass(['foo', 'bar'], element);
 dom.hide(element);
 dom.show(element);
 
-// hide or show multiple HTMLElements with an array:
+// hide or show multiple HTML Elements with an array:
 dom.hide([element1, element2]);
 dom.show([element1, element2]);
 
-// set CSS rules on an HTMLElement:
+// set CSS rules on an HTML Element:
 const rules = { width: '100px', height: '50px', backgroundColor: 'blue' };
 dom.setStyle(rules, element);
 
-// remove same rules object on an HTMLElement:
+// remove same rules object on an HTML Element:
 dom.removeStyle(rules, element);
 
 // remove CSS rules passed as a string or an array:
 dom.removeStyle('width height', element);
 dom.removeStyle(['width', 'height'], element);
 
-// set attributes on an HTMLElement:
+// set attributes on an HTML Element:
 const attrs = {
   id:           'foo',
   style:        'position: absolute; top: 10px; left: 20px;',
@@ -95,16 +98,26 @@ dom.setAttrs(attrs, element);
 ### Inserting elements into the DOM
 
 ```javascript
-// add HTMLElement to page body:
+// add HTML Element to page body:
 const element = document.createElement('div');
 dom.add(element);
 
-// add HTMLElement to specified parent HTMLElement:
+// add HTML Element to specified parent HTML Element:
 dom.add(element, parent);
 
-// prepend HTMLElement to page body, or specified parent:
+// add prepare HTML string to page body or parent Element:
+const html = '<p class="new-content">New content…</p>';
+dom.add(html);
+dom.add(html, parent);
+
+// prepend HTML Element to page body, or specified parent:
 dom.prepend(element);
 dom.prepend(element, parent);
+
+// prepend prepared HTML string to page body, or specified parent:
+const html = '<p class="new-content">New content…</p>';
+dom.prepend(html);
+dom.prepend(html, parent);
 ```
 
 ### Trigger a custom event on an element

@@ -6,7 +6,7 @@
 import { JSDOM } from 'jsdom';
 const jsDOM = new JSDOM();
 
-jsDOM.reconfigure({windowTop: 100 });
+jsDOM.reconfigure({ windowTop: 100 });
 const { window } = jsDOM;
 const { document } = window;
 
@@ -26,6 +26,39 @@ test('includes a reference to the document <html> element', t => {
 test('includes a reference to the document <body> element', t => {
   t.is(typeof dom.body, 'object');
   t.is(dom.body.nodeName, 'BODY');
+});
+
+// test('can check that document matches a media query', t => {
+//   const result = dom.media('(min-width: 640px)');
+//   console.log('result: ', result);
+//   t.true(result);
+// });
+
+test('can check that passed values is NOT an HTML element', t => {
+  let result = dom.isElement();
+  t.false(result, 'Undefined is not an Element node');
+
+  let test = 'foo';
+  result = dom.isElement(test);
+  t.false(result, 'String is not an Element node');
+
+  test = 10;
+  result = dom.isElement(test);
+  t.false(result, 'Number is not an Element node');
+
+  test = document.createTextNode('test');
+  result = dom.isElement(test);
+  t.false(result, 'Text node is not an Element node');
+});
+
+test('can check passed value is an HTML element', t => {
+  let el = document.createElement('div');
+  let result = dom.isElement(el);
+  t.true(result);
+
+  el = document.createElement('p');
+  result = dom.isElement(el);
+  t.true(result);
 });
 
 function tag(type) {
@@ -188,7 +221,7 @@ test('can show multiple hidden elements', t => {
 test('can set a collection of styles rules on an element', t => {
   const element = tag('div');
   const styles = {
-    width:  '200px',
+    width: '200px',
     height: '100px',
     backgroundColor: 'blue'
   };
@@ -232,7 +265,7 @@ test('can remove multiple style rules as a string from an element', t => {
 test('can remove a collection object of styles rules from an element', t => {
   const element = tag('div');
   const styles = {
-    width:  '200px',
+    width: '200px',
     height: '100px',
     backgroundColor: 'blue'
   };
@@ -244,7 +277,7 @@ test('can remove a collection object of styles rules from an element', t => {
   t.is(element.style.backgroundColor, styles.backgroundColor);
 
   dom.removeStyle(styles, element);
-  
+
   t.not(element.style.width, styles.width);
   t.not(element.style.height, styles.height);
   t.not(element.style.backgroundColor, styles.backgroundColor);
@@ -253,7 +286,7 @@ test('can remove a collection object of styles rules from an element', t => {
 test('can remove a collection array of styles rules from an element', t => {
   const element = tag('div');
   const styles = {
-    width:  '200px',
+    width: '200px',
     height: '100px',
     backgroundColor: 'blue'
   };
@@ -266,7 +299,7 @@ test('can remove a collection array of styles rules from an element', t => {
 
   const toRemove = ['width', 'backgroundColor'];
   dom.removeStyle(toRemove, element);
-  
+
   t.not(element.style.width, styles.width);
   t.is(element.style.height, styles.height);
   t.not(element.style.backgroundColor, styles.backgroundColor);
@@ -277,7 +310,7 @@ test('can remove styles from a custom element shadowRoot', t => {
   element.mockSR = true;
 
   const styles = {
-    width:  '200px',
+    width: '200px',
     height: '100px',
     backgroundColor: 'blue'
   };
@@ -296,9 +329,9 @@ test('can remove styles from a custom element shadowRoot', t => {
 test('can set a collection of attributes on an element', t => {
   const element = tag('div');
   const attrs = {
-    id:           'foo',
-    style:        'position: absolute; top: 10px; left: 20px;',
-    'data-test':  'bar'
+    id: 'foo',
+    style: 'position: absolute; top: 10px; left: 20px;',
+    'data-test': 'bar'
   };
 
   dom.setAttrs(attrs, element);
@@ -311,7 +344,7 @@ test('can set a collection of attributes on an element', t => {
 test('can check that an element has an attribute set', t => {
   const element = tag('div');
   t.false(dom.hasAttr('id', element));
-  
+
   element.setAttribute('id', 'bar');
   t.is(dom.hasAttr('id', element), 'bar');
 });
@@ -351,6 +384,17 @@ test('can add an element to the DOM body element', t => {
   t.is(found, element);
 });
 
+test('can add an an HTML string as an element to the DOM body element', t => {
+  const html = '<div id="test2"></div>';
+  dom.add(html);
+
+  const found = document.querySelector('div#test2');
+
+  t.is(typeof found, 'object');
+  t.is(found.nodeName, 'DIV', 'Added node is expected type');
+  t.true('test2' === found.id, 'Added element has expected ID');
+});
+
 test('can add an element to a defined parent element', t => {
   const parent = document.createElement('div');
   parent.id = 'testParent';
@@ -385,6 +429,30 @@ test('can prepend an element to a defined parent element', t => {
 
   found = parent.firstChild;
   t.is(found.nodeName, 'HEADER');
+});
+
+test('can prepend HTML string to BODY Element', t => {
+  const id = 'prependTest';
+  const test = `<div id="${id}"></div>`;
+  dom.prepend(test);
+
+  const found = document.querySelector('#' + id);
+  t.is(found.nodeName, 'DIV', 'Added node is expected type');
+  t.true(id === found.id, 'Added element has expected ID');
+});
+
+test('can prepend HTML string to defined parent Element', t => {
+  const parent = document.createElement('div');
+  parent.id = 'testParent';
+  document.body.appendChild(parent);
+
+  const id = 'prependTest2';
+  const test = `<div id="${id}"></div>`;
+  dom.prepend(test, parent);
+
+  const found = parent.firstChild;
+  t.is(found.nodeName, 'DIV', 'Added node is expected type');
+  t.true(id === found.id, 'Added element has expected ID');
 });
 
 test('can check if an element matches a given selector', t => {
@@ -462,7 +530,7 @@ test('can return the dimensions of an element', t => {
   const element = document.createElement('div');
   document.body.appendChild(element);
   element.style.cssText = 'width: 100px; height: 50px;';
-  
+
   const dims = dom.dims(element);
   t.is(typeof dims, 'object');
 
@@ -518,7 +586,7 @@ test('can trigger a custom event without data', t => {
 
     // …but return no data:
     t.is(e.detail(e.type), undefined);
-    
+
     // check that our custom event is registered:
     t.is(typeof dom.customEvents, 'object');
     t.is(typeof dom.customEvents['test.value'], 'object');
@@ -539,7 +607,7 @@ test('can now add data to a previous custom event', t => {
     t.is(typeof e.detail, 'function');
     const data = e.detail(e.type);
     t.is(typeof data, 'object');
-    
+
     // check returned object is equal to our test eventData:
     t.deepEqual(data, eventData);
     t.is(typeof data.value, 'string');

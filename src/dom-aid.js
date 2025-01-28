@@ -5,12 +5,12 @@ const DOM = {
   modern: true, // for switching testing routines.
   win: null,    // represents window object.
   doc: null,    // represents window.document object.
-  
+
   /**
    * Set operating environment and related properties, via a window object.
    * In normal operation this would be the browser window object; in testing
    * this will be an instance of the JSDOM module window object.
-   * 
+   *
    * @param {Object} w – representing global window object
    */
   setEnvironment(w = window) {
@@ -20,10 +20,14 @@ const DOM = {
     this.body = this.doc.querySelector('body');
   },
 
+  isElement(element) {
+    return !!element && element.nodeType === DOM.body.ELEMENT_NODE;
+  },
+
   /**
-   * 
-   * @param {string} query - representing @media query string. 
-   * @returns 
+   * Check if document matches suopplied media query.
+   * @param {string} query - representing @media query string.
+   * @returns {Boolean}
    */
   media(query) {
     return this.win.matchMedia && this.win.matchMedia(query).matches;
@@ -33,27 +37,27 @@ const DOM = {
    * Does the target element have the defined css class name.
    * @param {string} className – representing css class selector.
    * @param {Element} element - target HTML element.
-   * @returns 
+   * @returns {Boolean}
    */
   hasClass(className, element) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return false; }
 
     if (DOM.modern && element.classList) {
       return (element.classList && element.classList.contains(className));
     } else {
-      const regexName = new RegExp('[\w\s]*'+ className + '[\s\w]*');
+      const regexName = new RegExp('[\w\s]*' + className + '[\s\w]*');
       return regexName.test(element.className);
     }
   },
 
   /**
    * Add css class selectors to target HTML element.
-   * @param {string} classname – selector to add, or multiple selectors
-   * separated by a space.
+   * @param {string} classname – selector to add, or multiple
+   * selectors separated by a space.
    * @params {Element} element – on which class is to be added.
    */
   addClass(className, element) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return; }
 
     if (DOM.modern && element.classList) {
       className.trim().split(' ')
@@ -71,7 +75,7 @@ const DOM = {
   },
 
   toggleClass(className, element) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return; }
     element.classList.toggle(className);
   },
 
@@ -80,16 +84,16 @@ const DOM = {
    * @param {string} className – selector to remove, or multiple selectors
    * separated by a space.
    * @param {Element} element - target HTML element.
-   * @returns 
+   * @returns
    */
   removeClass(className, element) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return; }
 
     if (DOM.modern && element.classList) {
       if ('string' === typeof className) {
         className = className.trim().split(' ');
       }
-      
+
       className.forEach((name) => element.classList.remove(name));
 
     } else {
@@ -99,7 +103,7 @@ const DOM = {
       }
 
       element.className = element.className
-        .replace( new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+        .replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
     }
 
     // when element class attribute ends being empty, remove it:
@@ -107,7 +111,7 @@ const DOM = {
   },
 
   /**
-   * @params {HTMLElement|Array} elements - to be hidden.
+   * @params {Element|Array} elements - to be hidden.
    */
   hide(elements) {
     if (Array !== (elements).constructor) { elements = [elements]; }
@@ -115,7 +119,7 @@ const DOM = {
   },
 
   /**
-   * @params {HTMLElement|Array} elements - to be made visible.
+   * @params {Element|Array} elements - to be made visible.
    */
   show(elements) {
     if (Array !== (elements).constructor) { elements = [elements]; }
@@ -124,10 +128,10 @@ const DOM = {
 
   /**
    * @params {Object} rules - style rule properties and their values.
-   * @params {HTMLElement} element - on which style rules are to be applied.
+   * @params {Element} element - on which style rules are to be applied.
    */
   setStyle(rules, element) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return; }
 
     for (let prop in rules) {
       if (rules.hasOwnProperty(prop)) { element.style[prop] = rules[prop]; }
@@ -135,19 +139,19 @@ const DOM = {
   },
 
   /**
-   * @params {Object} rules - style rule properties and their values.
-   * @params {HTMLElement} element - on which style rules are to be removed.
+   * @params {Object|String} rules - style rule properties and their values.
+   * @params {Element} element - on which style rules are to be removed.
    */
   removeStyle(rules, element) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return; }
     const hasSR = !!element.shadowRoot || element.mockSR;
-    
+
     const rcn = rules.constructor.name;
     if ('Object' === rcn) {
       rules = Object.keys(rules);
     } else if ('String' === rcn) {
       rules = rules.trim().split(' ');
-    } 
+    }
 
     /*
      * CSSStyleDeclaration.removeProperty() expects property name
@@ -168,10 +172,10 @@ const DOM = {
 
   /**
    * @params {Object} attrs - attribute property names and their values.
-   * @params {HTMLElement} element - on which attributes are to be applied.
+   * @params {Element} element - on which attributes are to be applied.
    */
   setAttrs(attrs, element) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return; }
 
     for (let prop in attrs) {
       if (attrs.hasOwnProperty(prop)) {
@@ -182,14 +186,14 @@ const DOM = {
 
   /**
    * Check if an element has an attribute value.
-   * 
+   *
    * @param {String} attrName - to be read on hte targeted element.
-   * @param {HTMLElement} element - on which to read the required attribute.
+   * @param {Element} element - on which to read the required attribute.
    * @returns {String|Boolean} – found attribute value or false if named
    * attribute does not exist on the target element.
    */
   hasAttr(attrName, element) {
-    if (!element) { return false; }
+    if (!this.isElement(element)) { return false; }
     const value = element.getAttribute(attrName);
     return value || false;
   },
@@ -201,7 +205,7 @@ const DOM = {
    * @returns {boolean}
    */
   is(element, tagName) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return false; }
     return element.tagName.toLowerCase() === tagName.toLowerCase();
   },
 
@@ -209,37 +213,44 @@ const DOM = {
     const nodes = element.querySelectorAll(selector);
     if (!nodes || 0 === nodes.length) { return; }
 
-   /*
-    * convert NodeList to an Array, otherwise IE throws error on a
-    * subsequent forEach:
-    */
+    /*
+     * convert NodeList to an Array, otherwise IE throws error on a
+     * subsequent forEach:
+     */
     return Array.prototype.slice.call(nodes);
   },
 
   /**
-   * Append supplied element to document body element or defined parent element.
-   * @param {Element} element – to be appended.
+   * Append supplied element or HTML string to document body element
+   * or defined parent element.
+   * @param {Element|String} element node or HTML string – to be appended.
    * @param {Element} [parent=<body>] - defined parent HTML element.
    */
   add(element, parent = DOM.body) {
-    if (!element) { return; }
-    parent.appendChild(element);
+    if (String === (element).constructor) {
+      parent.insertAdjacentHTML('beforeend', element);
+    } else if (this.isElement(element)) {
+      parent.appendChild(element);
+    }
   },
 
   /**
    * Prepend supplied element to document body element or
    * defined parent element.
-   * @param {Element} element – to be prepended.
+   * @param {Element|String} element or HTML string – to be prepended.
    * @param {Element} [parent=<body>] - defined parent HTML element.
    */
   prepend(element, parent = DOM.body) {
-    if (!element) { return; }
-    parent.insertBefore(element, parent.firstChild);
+    if (String === (element).constructor) {
+      parent.insertAdjacentHTML('afterbegin', element);
+    } else if (this.isElement(element)) {
+      parent.insertBefore(element, parent.firstChild);
+    }
   },
 
   /**
    * Does the supplied element match the defined css selector.
-   * @param {Element} element - target HTML element. 
+   * @param {Element} element - target HTML element.
    * @param {string} selector - css selector to test against.
    * @returns {boolean}
    */
@@ -263,7 +274,7 @@ const DOM = {
    * @returns {Element|null} - found parent element or null for none found.
    */
   parent(element, selector) {
-    if (!element) { return; }
+    if (!this.isElement(element)) { return; }
     let target = element;
     let found;
     let parent;
@@ -282,17 +293,17 @@ const DOM = {
   /**
    * Get the dimensions of the defined element or, when no element is passed,
    * the window object (browser viewport).
-   * 
+   *
    * @params {HTMLElement} element (optional) – target DOM element.
-   * @return {DOMRect|Object} – of target element, or if element is undefined, 
+   * @return {DOMRect|Object} – of target element, or if element is undefined,
    * values for the view-port (window).
    */
   dims(element) {
-    if (element) { return element.getBoundingClientRect(); }
+    if (this.isElement(element)) { return element.getBoundingClientRect(); }
 
     return {
-      top:    DOM.win.pageYOffset,
-      width:  DOM.win.innerWidth,
+      top: DOM.win.pageYOffset,
+      width: DOM.win.innerWidth,
       height: DOM.win.innerHeight,
       bottom: DOM.win.pageYOffset + DOM.win.innerHeight
     };
@@ -303,7 +314,7 @@ const DOM = {
    * event data.
    * @param {string} eventName - represent custom event name.
    * @param {Element} element - target on which event is to be triggered.
-   * @param {*} [data] - event accompanying data. 
+   * @param {*} [data] - event accompanying data.
    */
   trigger(eventName, element, data) {
     const event = getCustomEvent(eventName, data);
@@ -342,7 +353,7 @@ function getCustomEvent(eventName, data) {
    * detail method, i.e. (evt) => evt.detail()
    */
   data && (customEventDataStore[eventName] = data);
-  
+
   // return early with an already registered custom event:
   if (DOM.customEvents && DOM.customEvents[eventName]) {
     return DOM.customEvents[eventName];
@@ -378,7 +389,7 @@ function createCustomEvent(eventName) {
 /**
  * Custom events are stored locally, for easier recall (triggering).
  * @param {string} eventName - representing custom event name.
- * @param {CustomEvent} event object. 
+ * @param {CustomEvent} event object.
  */
 function registerCustomEvent(eventName, event) {
   if (null === DOM.customEvents) { DOM.customEvents = {}; }
@@ -394,7 +405,7 @@ function eventData(eventName) {
   let data = customEventDataStore[eventName];
   // when needed, invoke data function:
   if ('function' == typeof data) { data = data(); }
-  
+
   // make sure any stored data are removed after all event handler calls.
   data && setTimeout(() => clearEventData(eventName), 0);
   return data;
@@ -413,8 +424,7 @@ function clearEventData(eventName) {
  * Polyfill code gleaned from MDN:
  * https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
  */
-function PolyCustomEvent(event, params)
-{
+function PolyCustomEvent(event, params) {
   params = params || {
     bubbles: false, cancelable: false, detail: undefined
   };
