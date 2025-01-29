@@ -254,8 +254,8 @@ const DOM = {
   },
 
   /**
-   * Append supplied element(s) or HTML string(s) to document body element
-   * or defined parent element.
+   * Append supplied element(s), HTML string(s), or plain string to
+   * document body element or defined parent element.
    *
    * @param {(Element|string|Array.Element|string)} elements – to be
    * appended to DOM.
