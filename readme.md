@@ -1,7 +1,5 @@
 # DOMaid
 
-While jQuery provides a comprehensive set of tools to modify elements within the DOM, some projects require just something smaller and simpler.
-
 DOMaid provides helper functions to perform simple and regularly used HTML DOM actions supporting both modern and some legacy browsers.
 
 ## Usage
@@ -12,7 +10,7 @@ import dom from './path-to/dom-aid.js';
 
 ## What can it do?
 
-DOMaid provides a collection of methods to find, examine, modify and insert HTML elements in the DOM.
+DOMaid provides a collection of methods to find, examine, modify and insert HTML elements in the DOM. Plus, trigger custom events on an element, easily.
 
 ### Find elements
 
