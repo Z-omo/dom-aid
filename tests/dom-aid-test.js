@@ -690,6 +690,17 @@ test('can prepend HTML string to defined parent Element', t => {
   t.true(id === found.id, 'Added element has expected ID');
 });
 
+test('can not prepend a empty HTML string to a parent element', t => {
+  const parent = tag('div');
+  dom.prepend('   ', parent);
+
+  const nodes = parent.childNodes;
+  t.is(nodes.length, 0);
+
+  t.is(parent.innerHTML, '');
+  t.is(parent.textContent, '');
+});
+
 test('can prepend an element to a ShadowRoot', t => {
   const parent = tag('div');
   parent.attachShadow({ mode: "open" });

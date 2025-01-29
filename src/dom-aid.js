@@ -296,7 +296,8 @@ const DOM = {
    */
   prepend(element, parent = DOM.body) {
     if (String === (element).constructor) {
-      element.trim() && (element = this.stringToNodes(element)[0]);
+      element = element.trim();
+      element && (element = this.stringToNodes(element)[0]);
     }
     if (!this.isElement(element)) { return; }
 
