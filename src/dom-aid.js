@@ -27,7 +27,8 @@ const DOM = {
 
   /**
    * Convert a string of HTML to actual HTML Elements.
-   * @param {String} s – representing prepared HTML content.
+   *
+   * @param {string} s – representing prepared HTML content.
    * @returns {Array.Element}
    */
   stringToNodes(s) {
@@ -45,8 +46,9 @@ const DOM = {
 
   /**
    * Check if document matches supplied media query.
+   *
    * @param {string} query - representing @media query string.
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   media(query) {
     return this.win.matchMedia && this.win.matchMedia(query).matches;
@@ -54,9 +56,10 @@ const DOM = {
 
   /**
    * Does the target element have the defined css class name.
+   *
    * @param {string} className – representing css class selector.
    * @param {Element} element - target HTML element.
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   hasClass(className, element) {
     if (!this.isElement(element)) { return false; }
@@ -71,9 +74,10 @@ const DOM = {
 
   /**
    * Add css class selectors to target HTML element.
+   *
    * @param {string} classname – selector to add, or multiple
    * selectors separated by a space.
-   * @params {Element} element – on which class is to be added.
+   * @param {Element} element – on which class is to be added.
    */
   addClass(className, element) {
     if (!this.isElement(element)) { return; }
@@ -100,8 +104,9 @@ const DOM = {
 
   /**
    * Remove single/multiple css class selectors from target element.
-   * @param {string} className – selector to remove, or multiple selectors
-   * separated by a space.
+   *
+   * @param {string} className – selector to remove, or multiple
+   * selectors separated by a space.
    * @param {Element} element - target HTML element.
    * @returns
    */
@@ -130,24 +135,24 @@ const DOM = {
   },
 
   /**
-   * @params {Element|Array} elements - to be hidden.
+   * @param {(Element|Array)} elements - to be hidden.
    */
   hide(elements) {
     if (Array !== (elements).constructor) { elements = [elements]; }
-    elements.forEach(e => e.style.display = 'none');
+    elements.forEach(e => this.isElement(e) && (e.style.display = 'none'));
   },
 
   /**
-   * @params {Element|Array} elements - to be made visible.
+   * @param {(Element|Array)} elements - to be made visible.
    */
   show(elements) {
     if (Array !== (elements).constructor) { elements = [elements]; }
-    elements.forEach(e => e.style.display = '');
+    elements.forEach(e => this.isElement(e) && (e.style.display = ''));
   },
 
   /**
-   * @params {Object} rules - style rule properties and their values.
-   * @params {Element} element - on which style rules are to be applied.
+   * @param {Object} rules - style rule properties and their values.
+   * @param {Element} element - on which style rules are to be applied.
    */
   setStyle(rules, element) {
     if (!this.isElement(element)) { return; }
@@ -158,8 +163,8 @@ const DOM = {
   },
 
   /**
-   * @params {Object|String} rules - style rule properties and their values.
-   * @params {Element} element - on which style rules are to be removed.
+   * @param {(Object|string)} rules - style rule properties and their values.
+   * @param {Element} element - on which style rules are to be removed.
    */
   removeStyle(rules, element) {
     if (!this.isElement(element)) { return; }
@@ -190,8 +195,8 @@ const DOM = {
   },
 
   /**
-   * @params {Object} attrs - attribute property names and their values.
-   * @params {Element} element - on which attributes are to be applied.
+   * @param {Object} attrs - attribute property names and their values.
+   * @param {Element} element - on which attributes are to be applied.
    */
   setAttrs(attrs, element) {
     if (!this.isElement(element)) { return; }
@@ -206,9 +211,9 @@ const DOM = {
   /**
    * Check if an element has an attribute value.
    *
-   * @param {String} attrName - to be read on hte targeted element.
+   * @param {string} attrName - to be read on hte targeted element.
    * @param {Element} element - on which to read the required attribute.
-   * @returns {String|Boolean} – found attribute value or false if named
+   * @returns {(string|boolean)} – found attribute value or false if named
    * attribute does not exist on the target element.
    */
   hasAttr(attrName, element) {
@@ -219,6 +224,7 @@ const DOM = {
 
   /**
    * Is target element of type tag name.
+   *
    * @param {Element} element - target HTML element.
    * @param {string} tagName - element tag name to match.
    * @returns {boolean}
@@ -250,7 +256,8 @@ const DOM = {
   /**
    * Append supplied element(s) or HTML string(s) to document body element
    * or defined parent element.
-   * @param {(Element|String|Array.Element|String)} elements – to be
+   *
+   * @param {(Element|string|Array.Element|string)} elements – to be
    * appended to DOM.
    * @param {Element} [parent=<body>] - target parent Element.
    */
@@ -261,11 +268,13 @@ const DOM = {
     const append = [];
     elements.forEach(v => {
       if (String === (v).constructor) {
-        append.push(...this.stringToNodes(v));
+        v.trim() && append.push(...this.stringToNodes(v));
       } else if (this.isElement(v)) {
         append.push(v);
       }
     });
+
+    if (0 === append.length) { return; }
 
     // depending on number of elements to add, create the target element:
     const t = (1 < append.length) ? this.doc.createDocumentFragment() : parent;
@@ -280,7 +289,8 @@ const DOM = {
   /**
    * Prepend supplied element to document body element or
    * defined parent element.
-   * @param {(Element|String)} element or HTML string – to be prepended.
+   *
+   * @param {(Element|string)} element or HTML string – to be prepended.
    * @param {Element} [parent=<body>] - defined parent HTML element.
    */
   prepend(element, parent = DOM.body) {
@@ -293,6 +303,7 @@ const DOM = {
 
   /**
    * Does the supplied element match the defined css selector.
+   *
    * @param {Element} element - target HTML element.
    * @param {string} selector - css selector to test against.
    * @returns {boolean}
@@ -312,9 +323,10 @@ const DOM = {
   /**
    * Get the direct parent element of the supplied element, or the
    * ancestor element that matches the css selector.
+   *
    * @param {Element} element - target element.
    * @param {string} selector - css selector to test against.
-   * @returns {Element|null} - found parent element or null for none found.
+   * @returns {(Element|null)} - found parent element or null for none found.
    */
   parent(element, selector) {
     if (!this.isElement(element)) { return; }
@@ -337,8 +349,8 @@ const DOM = {
    * Get the dimensions of the defined element or, when no element is passed,
    * the window object (browser viewport).
    *
-   * @params {HTMLElement} element (optional) – target DOM element.
-   * @return {DOMRect|Object} – of target element, or if element is undefined,
+   * @param {HTMLElement} element (optional) – target DOM element.
+   * @return {(DOMRect|Object)} – of target element, or if element is undefined,
    * values for the view-port (window).
    */
   dims(element) {
@@ -355,6 +367,7 @@ const DOM = {
   /**
    * Trigger custom event on defined HTML element. Optionally, include
    * event data.
+   *
    * @param {string} eventName - represent custom event name.
    * @param {Element} element - target on which event is to be triggered.
    * @param {*} [data] - event accompanying data.
@@ -385,6 +398,7 @@ const customEventDataStore = {};
  * Create a native CustomEvent object, and include optional event data.
  * Event data can be anything, including a function, which is invoked when
  * event data are recalled (see function eventData).
+ *
  * @param {string} eventName – representing custom event name.
  * @param {*} [data] – data to accompany a custom event.
  * @returns {CustomEvent}
@@ -412,6 +426,7 @@ function getCustomEvent(eventName, data) {
 /**
  * Create custom event object, which will include a ‘detail’ property
  * for any event accompanying data.
+ *
  * @param {string} eventName - representing custom event name.
  * @returns {CustomEvent}
  */
@@ -431,6 +446,7 @@ function createCustomEvent(eventName) {
 
 /**
  * Custom events are stored locally, for easier recall (triggering).
+ *
  * @param {string} eventName - representing custom event name.
  * @param {CustomEvent} event object.
  */
@@ -441,6 +457,7 @@ function registerCustomEvent(eventName, event) {
 
 /**
  * Returns the data for the given custom event name.
+ *
  * @param {string} eventName - representing custom event name.
  * @returns {*} registered event accompanying data.
  */

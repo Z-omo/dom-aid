@@ -93,6 +93,10 @@ const attrs = {
 };
 
 dom.setAttrs(attrs, element);
+
+// empty an HTML Element of its children:
+dom.empty(element);
+dom.empty(); // clears <body> element.
 ```
 
 ### Inserting elements into the DOM
@@ -105,7 +109,7 @@ dom.add(element);
 // add HTML Element to specified parent HTML Element:
 dom.add(element, parent);
 
-// add multiple HTML Elements, via and Array, to page body or parent Element:
+// add multiple HTML Elements, via an Array, to page body or parent Element:
 const element1 = document.createElement('div');
 const element2 = document.createElement('p');
 dom.add([element1, element2]);

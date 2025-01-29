@@ -15,8 +15,10 @@ import dom from '../src/dom-aid.js';
 dom.setEnvironment(window); // set window object for tests.
 
 // Helper function to create a new HTML Element.
-function tag(type) {
-  return document.createElement(type);
+function tag(type, id) {
+  const t = document.createElement(type);
+  id && (t.id = id);
+  return t;
 }
 
 test('Imported DOMaid is an object', t => {
@@ -404,7 +406,7 @@ test('can check if an element is a certain tag', t => {
 });
 
 test('can find all elements for a given query selector', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
   const elements = [
     tag('div'),
@@ -424,19 +426,27 @@ test('can find all elements for a given query selector', t => {
 });
 
 test('can add an element to the DOM body element', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
-  const element = tag('div');
-  element.id = 'test';
-
+  const element = tag('div', 'test');
   dom.add(element);
 
   const found = document.querySelector('div#test');
   t.is(found, element);
 });
 
+test('can not add an empty string as an element', t => {
+  dom.empty(); // clear body Element of HTML.
+
+  dom.add('  ');
+
+  const nodes = dom.body.childNodes;
+  t.is(nodes.length, 0);
+  t.is(dom.body.innerHTML, '', 'Unexpected HTML in the body element');
+});
+
 test('can add an an HTML string as an element to the DOM body element', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
   const html = '<div id="test2"></div>';
   dom.add(html);
@@ -449,31 +459,27 @@ test('can add an an HTML string as an element to the DOM body element', t => {
 });
 
 test('can add an element to a defined parent element', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
-  const parent = tag('div');
-  parent.id = 'testParent';
+  const parent = tag('div', 'testParent');
   document.body.appendChild(parent);
 
   const element = tag('h1');
   const content = 'Test Title';
-  element.innerHTML = content;
+  element.textContent = content;
   dom.add(element, parent);
 
   const found = parent.querySelector('h1');
   t.is(found, element);
-  t.is(found.innerHTML, content);
+  t.is(found.textContent, content);
 });
 
 test('can add multiple elements to the DOM body element', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
-  const el1 = tag('div');
-  el1.id = 'test1';
-  const el2 = tag('div');
-  el2.id = 'test2';
-  const el3 = tag('div');
-  el3.id = 'test3';
+  const el1 = tag('div', 'test1');
+  const el2 = tag('div', 'test2');
+  const el3 = tag('div', 'test3');
 
   dom.add([el1, el2, el3]); // add array of Elements to DOM.
 
@@ -497,7 +503,7 @@ test('can add multiple elements to the DOM body element', t => {
 });
 
 test('can add multiple HTML strings to the DOM body element', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
   const html = [
     '<div id="test3"></div>',
@@ -526,13 +532,11 @@ test('can add multiple HTML strings to the DOM body element', t => {
 });
 
 test('can add a mix of HTML strings and Elements into body element', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
-  const el1 = tag('h1');
-  el1.id = 'test1';
+  const el1 = tag('h1', 'test1');
   el1.textContent = 'heading';
-  const el4 = tag('p');
-  el4.id = 'test4';
+  const el4 = tag('p', 'test4');
   el4.textContent = 'paragraph 2';
 
   const mix = [
@@ -569,11 +573,44 @@ test('can add a mix of HTML strings and Elements into body element', t => {
   t.is(node.textContent, el4.textContent);
 });
 
-test('can prepend an element to a defined parent element', t => {
-  dom.empty();
+test('can add a mix of Elements and HTML strings in a parent Element', t => {
+  dom.empty(); // clear body Element of HTML.
 
-  const parent = tag('div');
-  parent.id = 'testParent';
+  const parent = tag('div', 'test1');
+  document.body.appendChild(parent);
+
+  const h1 = tag('h1');
+  h1.textContent = 'heading';
+
+  const mix = [
+    h1,
+    '<p>paragraph</p>',
+    '<figure><img src=""></figure>'
+  ];
+
+  dom.add(mix, parent);
+
+  const nodes = parent.childNodes;
+  t.is(nodes.length, mix.length);
+
+  // check all 3 expected Elements, in order:
+  let node = nodes.item(0);
+  t.is(node, h1);
+  t.is(node.textContent, h1.textContent);
+
+  node = nodes.item(1);
+  t.is(node.nodeName, 'P');
+  t.is(node.textContent, 'paragraph');
+
+  node = nodes.item(2);
+  t.is(node.nodeName, 'FIGURE');
+  t.is(node.firstChild.nodeName, 'IMG');
+});
+
+test('can prepend an element to a defined parent element', t => {
+  dom.empty(); // clear body Element of HTML.
+
+  const parent = tag('div', 'testParent');
   document.body.appendChild(parent);
 
   const element = tag('h1');
@@ -593,7 +630,7 @@ test('can prepend an element to a defined parent element', t => {
 });
 
 test('can prepend HTML string to BODY Element', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
   const id = 'prependTest';
   const test = `<div id="${id}"></div>`;
@@ -605,10 +642,9 @@ test('can prepend HTML string to BODY Element', t => {
 });
 
 test('can prepend HTML string to defined parent Element', t => {
-  dom.empty();
+  dom.empty(); // clear body Element of HTML.
 
-  const parent = tag('div');
-  parent.id = 'testParent';
+  const parent = tag('div', 'testParent');
   document.body.appendChild(parent);
 
   const id = 'prependTest2';
@@ -621,8 +657,7 @@ test('can prepend HTML string to defined parent Element', t => {
 });
 
 test('can check if an element matches a given selector', t => {
-  const element = tag('div');
-  element.id = 'test';
+  const element = tag('div', 'test');
 
   let result = dom.matches(element, 'div#test');
   t.true(result);
@@ -633,8 +668,7 @@ test('can check if an element matches a given selector', t => {
 });
 
 test('can find an element\'s parent node', t => {
-  const parent = tag('div');
-  parent.id = 'testParent';
+  const parent = tag('div', 'testParent');
   document.body.appendChild(parent);
 
   const element = tag('h1');
