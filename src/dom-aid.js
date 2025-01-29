@@ -268,7 +268,8 @@ const DOM = {
     const append = [];
     elements.forEach(v => {
       if (String === (v).constructor) {
-        v.trim() && append.push(...this.stringToNodes(v));
+        v = v.trim();
+        v && append.push(...this.stringToNodes(v));
       } else if (this.isElement(v)) {
         append.push(v);
       }
@@ -276,14 +277,14 @@ const DOM = {
 
     if (0 === append.length) { return; }
 
-    // depending on number of elements to add, create the target element:
-    const t = (1 < append.length) ? this.doc.createDocumentFragment() : parent;
+    // create temporary fragment to hold prepared element(s):
+    const frag = this.doc.createDocumentFragment();
 
-    // set each passed element into target element:
-    append.forEach(el => t.appendChild(el));
+    // set each prepared element into fragment element:
+    append.forEach(el => frag.appendChild(el));
 
-    // if target is a temporary fragment, insert into intended parent:
-    t.nodeType === DOM.body.DOCUMENT_FRAGMENT_NODE && parent.appendChild(t);
+    // finally, append temporary fragment contents to target parent:
+    parent.appendChild(frag);
   },
 
   /**
@@ -295,10 +296,11 @@ const DOM = {
    */
   prepend(element, parent = DOM.body) {
     if (String === (element).constructor) {
-      parent.insertAdjacentHTML('afterbegin', element);
-    } else if (this.isElement(element)) {
-      parent.insertBefore(element, parent.firstChild);
+      element.trim() && (element = this.stringToNodes(element)[0]);
     }
+    if (!this.isElement(element)) { return; }
+
+    parent.insertBefore(element, parent.firstChild);
   },
 
   /**

@@ -435,6 +435,36 @@ test('can add an element to the DOM body element', t => {
   t.is(found, element);
 });
 
+test('can add an element to a ShadowRoot', t => {
+  const parent = tag('div');
+  parent.attachShadow({ mode: "open" });
+
+  const element = tag('div', 'test');
+  dom.add(element, parent.shadowRoot);
+
+  const found = parent.shadowRoot.querySelector('div#test');
+  t.is(found, element);
+  t.is(found.id, 'test');
+});
+
+test('can add multiple elements to a ShadowRoot', t => {
+  const parent = tag('div');
+  parent.attachShadow({ mode: "open" });
+
+  const mix = [
+    tag('h1'),
+    '<p></p>',
+    tag('div')
+  ];
+
+  dom.add(mix, parent.shadowRoot);
+
+  const nodes = parent.shadowRoot.childNodes;
+  t.is(nodes.item(0), mix[0]);
+  t.is(nodes.item(1).nodeName, 'P');
+  t.is(nodes.item(2), mix[2]);
+});
+
 test('can not add an empty string as an element', t => {
   dom.empty(); // clear body Element of HTML.
 
@@ -443,6 +473,20 @@ test('can not add an empty string as an element', t => {
   const nodes = dom.body.childNodes;
   t.is(nodes.length, 0);
   t.is(dom.body.innerHTML, '', 'Unexpected HTML in the body element');
+});
+
+test('can add an plain Text node to the DOM body', t => {
+  dom.empty(); // clear body Element of HTML.
+
+  const txt = 'test content';
+  dom.add(txt);
+
+  const nodes = dom.body.childNodes;
+  t.is(nodes.length, 1);
+
+  const node = nodes.item(0);
+  t.is(node.nodeType, document.body.TEXT_NODE);
+  t.is(dom.body.textContent, txt, 'Unexpected text in the body element');
 });
 
 test('can add an an HTML string as an element to the DOM body element', t => {
@@ -459,10 +503,7 @@ test('can add an an HTML string as an element to the DOM body element', t => {
 });
 
 test('can add an element to a defined parent element', t => {
-  dom.empty(); // clear body Element of HTML.
-
   const parent = tag('div', 'testParent');
-  document.body.appendChild(parent);
 
   const element = tag('h1');
   const content = 'Test Title';
@@ -477,11 +518,13 @@ test('can add an element to a defined parent element', t => {
 test('can add multiple elements to the DOM body element', t => {
   dom.empty(); // clear body Element of HTML.
 
-  const el1 = tag('div', 'test1');
-  const el2 = tag('div', 'test2');
-  const el3 = tag('div', 'test3');
+  const elements = [
+    tag('div', 'test1'),
+    tag('div', 'test2'),
+    tag('div', 'test3'),
+  ];
 
-  dom.add([el1, el2, el3]); // add array of Elements to DOM.
+  dom.add(elements); // add array of Elements to DOM.
 
   // find first element:
   let found = document.querySelector('div#test1');
@@ -574,10 +617,7 @@ test('can add a mix of HTML strings and Elements into body element', t => {
 });
 
 test('can add a mix of Elements and HTML strings in a parent Element', t => {
-  dom.empty(); // clear body Element of HTML.
-
   const parent = tag('div', 'test1');
-  document.body.appendChild(parent);
 
   const h1 = tag('h1');
   h1.textContent = 'heading';
@@ -608,14 +648,11 @@ test('can add a mix of Elements and HTML strings in a parent Element', t => {
 });
 
 test('can prepend an element to a defined parent element', t => {
-  dom.empty(); // clear body Element of HTML.
-
   const parent = tag('div', 'testParent');
-  document.body.appendChild(parent);
 
   const element = tag('h1');
   const content = 'Test Title';
-  element.innerHTML = content;
+  element.textContent = content;
 
   dom.prepend(element, parent);
 
@@ -642,10 +679,7 @@ test('can prepend HTML string to BODY Element', t => {
 });
 
 test('can prepend HTML string to defined parent Element', t => {
-  dom.empty(); // clear body Element of HTML.
-
   const parent = tag('div', 'testParent');
-  document.body.appendChild(parent);
 
   const id = 'prependTest2';
   const test = `<p id="${id}"></p>`;
@@ -654,6 +688,30 @@ test('can prepend HTML string to defined parent Element', t => {
   const found = parent.firstChild;
   t.is(found.nodeName, 'P', 'Added node is expected type');
   t.true(id === found.id, 'Added element has expected ID');
+});
+
+test('can prepend an element to a ShadowRoot', t => {
+  const parent = tag('div');
+  parent.attachShadow({ mode: "open" });
+
+  const element = tag('div', 'test');
+  dom.prepend(element, parent.shadowRoot);
+
+  const found = parent.shadowRoot.firstChild;
+  t.is(found, element);
+  t.is(found.id, 'test');
+});
+
+test('can prepend an HTML string to a ShadowRoot', t => {
+  const parent = tag('div');
+  parent.attachShadow({ mode: "open" });
+
+  const html = '<p id="test">paragraph</p>';
+  dom.prepend(html, parent.shadowRoot);
+
+  const found = parent.shadowRoot.firstChild;
+  t.is(found.nodeName, 'P');
+  t.is(found.id, 'test');
 });
 
 test('can check if an element matches a given selector', t => {

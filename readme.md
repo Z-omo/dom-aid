@@ -118,6 +118,9 @@ const html = '<p class="new-content">New content…</p>';
 dom.add(html);
 dom.add(html, parent);
 
+// add plain text to a parent element (as Text node):
+dom.add('My prepared content.', parent);
+
 // add a mix of Elements and prepared HTML strings:
 dom.add([element1, html, element2]);
 dom.add([element1, html, element2], parent);
