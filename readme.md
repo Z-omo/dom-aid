@@ -53,13 +53,13 @@ const result = dom.media('(min-width: 640px)');
 ### Modify elements
 
 ```javascript
-// Adds classname/s to an HTML Element:
+// Adds classname(s) to an HTML Element:
 dom.addClass('foo bar', element);
 
 // toggle HTML Element's classname:
 dom.toggleClass('foo', element);
 
-// remove an HTML Element's classname/s:
+// remove an HTML Element's classname(s):
 dom.removeClass('foo', element);
 dom.removeClass('foo bar', element);
 dom.removeClass(['foo', 'bar'], element);
