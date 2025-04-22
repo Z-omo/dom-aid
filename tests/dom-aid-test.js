@@ -21,6 +21,24 @@ function tag(type, id) {
   return t;
 }
 
+// class to create custom element with a shadow DOM.
+class TestShadowElement extends window.HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  connectedCallback() {
+    this.shadowRoot.innerHTML = `
+      <div class="wrapper">
+        <p>Test content</p>
+      </div>
+    `;
+  }
+}
+
+window.customElements.define('test-element', TestShadowElement);
+
 test('Imported DOMaid is an object', t => {
   t.is(typeof dom, 'object');
 });
@@ -761,6 +779,34 @@ test('can find an element\'s parent node of a given selector', t => {
 
   const found = dom.parent(element, '.test_parent');
   t.is(found, parent);
+});
+
+test('can find an element\'s direct parent from within shadowDOM', t => {
+  // first, let's create a custom element for this test.
+  const testElement = new TestShadowElement();
+  document.body.appendChild(testElement);
+
+  const w = testElement.shadowRoot.querySelector('.wrapper');
+  const found = dom.parent(w);
+
+  t.is(found, testElement);
+});
+
+test('can find an element\'s parent with selector from within shadowDOM', t => {
+  // first, let's create a custom element for this test.
+  const testElement = new TestShadowElement();
+  document.body.appendChild(testElement);
+
+  const id = 'outsideShadow';
+  const parent = tag('div', id);
+  parent.appendChild(testElement);
+  document.body.appendChild(parent);
+
+  const p = testElement.shadowRoot.querySelector('p');
+  const found = dom.parent(p, `#${id}`);
+
+  t.is(found, parent);
+  t.true(found.id === 'outsideShadow');
 });
 
 test('can return null when an element\'s parent node does not exist for a given selector', t => {

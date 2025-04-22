@@ -337,8 +337,15 @@ const DOM = {
     let found;
     let parent;
 
+    // set the value to identify a shadowRoot type:
+    const sRoot = this.win.Node.DOCUMENT_FRAGMENT_NODE;
+
     do {
       parent = target.parentNode;
+
+      // check for shadowRoot as a parent:
+      parent?.nodeType === sRoot && (parent = parent.host);
+
       if (!parent) { break; }
 
       found = !selector || this.matches(parent, selector);
