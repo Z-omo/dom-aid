@@ -14,7 +14,7 @@
     "@babel/preset-env": "^7.6.0",
     "@babel/register": "^7.6.0",
     "ava": "^5.3.1",
-    "jsdom": "^20.0.3"
+    "jsdom": "^29.0.2"
   },
   "ava": {
     "files": [
